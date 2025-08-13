@@ -28,7 +28,7 @@ my-streamlit-app
 
 3. Run the Streamlit app:
    ```
-   streamlit run src/app.py
+   streamlit run src/Dashboard.py
    ```
 
 ## Deployment
