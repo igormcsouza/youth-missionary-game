@@ -37,7 +37,7 @@ with st.form("compiled_form"):
 		total_points = 0
 		for entry in compiled_entries:
 			if entry.youth_id == selected_youth_id:
-				task = next((t for t in task_entries if t.id == entry.task_id), None)
+				task = task_by_id.get(entry.task_id)
 				if task:
 					total_points += task.points * entry.quantity + entry.bonus
 		YouthFormDataRepository.update_total_points(selected_youth_id, total_points)
