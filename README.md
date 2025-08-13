@@ -41,4 +41,4 @@ fly deploy
 
 ## Usage
 
-After running the app, open your web browser and navigate to `http://localhost:8501` to view the application. You should see "Hello, World!" displayed on the page.
+After running the app, open your web browser and navigate to `http://localhost:8501` to view the application. You should see an interactive dashboard with charts, tables, and controls for exploring your data.
