@@ -21,3 +21,4 @@ primary_region = 'gig'
   cpu_kind = 'shared'
   cpus = 1
   memory_mb = 1024
+

@@ -131,7 +131,7 @@ class CompiledFormDataRepository:
 
 # Connection strings
 SQLITE_URL = default_db_path
-POSTGRES_URL = os.getenv("POSTGRES-CONNECTION-STRING", "")
+POSTGRES_URL = os.getenv("POSTGRESCONNECTIONSTRING", "")
 
 # Choose database based on environment variable
 DB_URL = POSTGRES_URL if POSTGRES_URL else SQLITE_URL
