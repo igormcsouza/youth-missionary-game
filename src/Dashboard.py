@@ -31,7 +31,10 @@ compiled_entries = CompiledFormDataRepository.get_all()
 task_entries = TasksFormDataRepository.get_all()
 task_points = {}
 for entry in compiled_entries:
-    task = next((t for t in task_entries if t.id == entry.task_id), None)
+task_dict = {t.id: t for t in task_entries}
+task_points = {}
+for entry in compiled_entries:
+    task = task_dict.get(entry.task_id)
     if task:
         points = task.points * entry.quantity + entry.bonus
         task_points[task.tasks] = task_points.get(task.tasks, 0) + points
