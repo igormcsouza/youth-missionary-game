@@ -4,6 +4,7 @@ import sys
 import os
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
 from database import YouthFormDataRepository, TasksFormDataRepository
+from database import CompiledFormDataRepository
 
 st.title("Youth Form Data")
 
@@ -20,7 +21,24 @@ with st.expander("Add New Entry", expanded=True):
 			st.success("Entry added!")
 
 # Display stored entries
-st.header("Stored Entries")
+col1, col2 = st.columns([4,1])
+with col1:
+	st.header("Stored Entries")
+with col2:
+	if st.button("Update Total Points"):
+		compiled_entries = CompiledFormDataRepository.get_all()
+
+		task_by_id = {t.id: t for t in TasksFormDataRepository.get_all()}
+		for youth in YouthFormDataRepository.get_all():
+			total_points = 0
+			for entry in compiled_entries:
+				if entry.youth_id == youth.id:
+					task = task_by_id.get(entry.task_id)
+					if task:
+						total_points += task.points * entry.quantity + entry.bonus
+			if youth.id:
+				YouthFormDataRepository.update_total_points(youth.id, total_points)
+		st.rerun()
 entries = YouthFormDataRepository.get_all()
 if entries:
 	st.table([

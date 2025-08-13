@@ -43,8 +43,7 @@ with st.form("compiled_form"):
 					total_points += task.points * entry.quantity + entry.bonus
 		YouthFormDataRepository.update_total_points(selected_youth_id, total_points)
 		st.success("Compiled entry registered and youth total points updated!")
-		# Refresh youth_entries for display
-		youth_entries, task_entries, youth_options, task_options = refresh_youth_and_task_entries()
+		st.rerun()
 
 
 # Display stored compiled entries
