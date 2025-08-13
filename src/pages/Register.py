@@ -16,6 +16,7 @@ def refresh_youth_and_task_entries():
 	return youth_entries, task_entries, youth_options, task_options
 
 youth_entries, task_entries, youth_options, task_options = refresh_youth_and_task_entries()
+task_by_id = {t.id: t for t in task_entries}
 
 with st.form("compiled_form"):
 	selected_youth_id = st.selectbox("Select Youth", options=list(youth_options.keys()), format_func=lambda x: youth_options[x] if x in youth_options else "")

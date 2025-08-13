@@ -30,7 +30,6 @@ else:
 compiled_entries = CompiledFormDataRepository.get_all()
 task_entries = TasksFormDataRepository.get_all()
 task_points = {}
-for entry in compiled_entries:
 task_dict = {t.id: t for t in task_entries}
 task_points = {}
 for entry in compiled_entries:
