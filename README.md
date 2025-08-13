@@ -1,6 +1,6 @@
 # Youth Missionary Game Streamlit App
 
-This is a simple Streamlit application that displays "Hello, World!" on the web page.
+This is a Streamlit application designed as a youth missionary game, providing interactive activities and resources to engage young participants in missionary work.
 
 ## Project Structure
 
