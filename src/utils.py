@@ -9,7 +9,7 @@ def check_password():
     auth_password = os.environ.get("AUTH")
 
     if auth_password is None:
-        st.error("Authentication is not configured. Please set the AUTH environment variable.")
+        st.error("Autenticação não configurada. Por favor, defina a variável de ambiente AUTH.")
         return False
 
     def password_entered():
