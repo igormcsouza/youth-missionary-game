@@ -1,7 +1,7 @@
-# Page: Registrar
 import time
 from datetime import datetime
 
+import pandas as pd
 import streamlit as st
 
 from utils import check_password
@@ -65,7 +65,7 @@ if compiled_entries:
 	def get_task_by_id(id_):
 		return task_options.get(id_, str(id_))
 
-	st.table([
+	df_compiled = pd.DataFrame([
 		{
 			"Jovem": get_name_by_id(e.youth_id),
 			"Tarefa": get_task_by_id(e.task_id),
@@ -75,5 +75,6 @@ if compiled_entries:
 			"Pontuação Total": e.quantity * task_by_id[e.task_id].points + e.bonus
 		} for e in compiled_entries
 	])
+	st.dataframe(df_compiled, hide_index=True)
 else:
 	st.info("Nenhuma entrada compilada salva ainda.")

@@ -1,4 +1,4 @@
-# Page: Dados
+import pandas as pd
 import streamlit as st
 
 from utils import check_password
@@ -49,7 +49,7 @@ with col2:
 		st.rerun()
 entries = YouthFormDataRepository.get_all()
 if entries:
-	st.table([
+	df = pd.DataFrame([
 		{
 			"Nome": e.name,
 			"Idade": e.age,
@@ -57,6 +57,7 @@ if entries:
 			"Pontuação Total": e.total_points
 		} for e in entries
 	])
+	st.dataframe(df, hide_index=True)
 else:
 	st.info("Nenhum cadastro salvo ainda.")
 
@@ -79,12 +80,13 @@ with st.expander("Adicionar Nova Tarefa", expanded=True):
 st.header("Tarefas Salvas")
 task_entries = TasksFormDataRepository.get_all()
 if task_entries:
-	st.table([
+	df_tasks = pd.DataFrame([
 		{
 			"Tarefa": t.tasks,
 			"Pontuação": t.points,
 			"Repetível": "Sim" if t.repeatable else "Não"
 		} for t in task_entries
 	])
+	st.dataframe(df_tasks, hide_index=True)
 else:
 	st.info("Nenhuma tarefa salva ainda.")
