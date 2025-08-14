@@ -1,6 +1,3 @@
-import os
-import sys
-
 import pandas as pd
 import streamlit as st
 import plotly.graph_objects as go
@@ -8,23 +5,31 @@ import plotly.graph_objects as go
 from database import YouthFormDataRepository, TasksFormDataRepository, CompiledFormDataRepository
 
 
-st.title("Youth Missionary Dashboard")
+st.set_page_config(page_title="Dashboard", page_icon="📊")
+
+
+st.title("Painel de Jovens Missionários")
+
 
 # Table: YouthFormData ordered by highest total points
 youth_entries = YouthFormDataRepository.get_all()
-sorted_youth = sorted(youth_entries, key=lambda y: y.total_points, reverse=True)
-st.header("Youth Ranking by Total Points")
+filtered_youth = [y for y in youth_entries if y.total_points > 0]
+sorted_youth = sorted(filtered_youth, key=lambda y: y.total_points, reverse=True)
+
+st.header("Ranking dos Jovens por Pontuação Total")
 if sorted_youth:
-    st.table([
+    df = pd.DataFrame([
         {
-            "Name": y.name,
-            "Age": y.age,
-            "Organization": y.organization,
-            "Total Points": y.total_points
-        } for y in sorted_youth
+            "Ranking": idx + 1,
+            "Nome": y.name,
+            "Idade": y.age,
+            "Organização": y.organization,
+            "Pontuação Total": y.total_points
+        } for idx, y in enumerate(sorted_youth)
     ])
+    st.dataframe(df, hide_index=True)
 else:
-    st.info("No youth entries stored yet.")
+    st.info("Nenhum jovem cadastrado ainda.")
 
 # Pie chart: Most pointed task
 compiled_entries = CompiledFormDataRepository.get_all()
@@ -39,9 +44,26 @@ for entry in compiled_entries:
         task_points[task.tasks] = task_points.get(task.tasks, 0) + points
 
 if task_points:
-    st.header("Most Pointed Tasks")
-    df = pd.DataFrame({"Task": list(task_points.keys()), "Points": list(task_points.values())})
-    fig = go.Figure(data=[go.Pie(labels=df["Task"], values=df["Points"], title="Points by Task")])
+    st.header("Tarefas Mais Pontuadas")
+    df = pd.DataFrame({"Tarefa": list(task_points.keys()), "Pontuação": list(task_points.values())})
+    fig = go.Figure(data=[go.Pie(labels=df["Tarefa"], values=df["Pontuação"], title="Pontuação por Tarefa")])
     st.plotly_chart(fig, use_container_width=True)
 else:
-    st.info("No task points data available.")
+    st.info("Nenhuma pontuação de tarefa disponível.")
+
+# Bar chart: Total points for Young Man and Young Woman
+young_man_points = sum(y.total_points for y in youth_entries if y.organization == "Rapazes")
+young_woman_points = sum(y.total_points for y in youth_entries if y.organization == "Moças")
+COLOR_YOUNG_MAN, COLOR_YOUNG_WOMAN = ["#1f77b4", "#e75480"]
+
+if young_man_points == 0 and young_woman_points == 0:
+    st.info("Nenhuma pontuação total disponível para Rapazes e Moças.")
+else:
+    st.header("Pontuação Total por Organização")
+    bar_df = pd.DataFrame({
+        "Organização": ["Rapazes", "Moças"],
+        "Pontuação Total": [young_man_points, young_woman_points]
+    })
+    bar_fig = go.Figure(data=[go.Bar(x=bar_df["Organização"], y=bar_df["Pontuação Total"], marker_color=[COLOR_YOUNG_MAN, COLOR_YOUNG_WOMAN] )])
+    bar_fig.update_layout(yaxis_title="Pontuação Total", xaxis_title="Organização")
+    st.plotly_chart(bar_fig, use_container_width=True)
