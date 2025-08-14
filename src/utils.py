@@ -27,7 +27,12 @@ def check_password():
 
     # Wrong password
     elif not st.session_state["password_correct"]:
-        st.text_input("Password", type="password", on_change=password_entered, key="password")
+        st.text_input("Senha", type="password", on_change=password_entered, key="password")
+        return False
+
+    # Wrong password
+    elif not st.session_state["password_correct"]:
+        st.text_input("Senha", type="password", on_change=password_entered, key="password")
         st.error("Senha incorreta")
         return False
 
