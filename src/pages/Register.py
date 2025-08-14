@@ -1,9 +1,17 @@
-import streamlit as st
-import sys
-import os
 import time
-sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
+
+import streamlit as st
+
+from utils import check_password
 from database import YouthFormDataRepository, TasksFormDataRepository, CompiledFormDataRepository
+
+
+st.set_page_config(page_title="Register")
+
+
+if not check_password():
+    st.stop()
+
 
 st.title("Register Compiled Form Data")
 

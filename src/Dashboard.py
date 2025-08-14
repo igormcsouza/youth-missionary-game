@@ -1,6 +1,3 @@
-import os
-import sys
-
 import pandas as pd
 import streamlit as st
 import plotly.graph_objects as go
@@ -8,7 +5,11 @@ import plotly.graph_objects as go
 from database import YouthFormDataRepository, TasksFormDataRepository, CompiledFormDataRepository
 
 
+st.set_page_config(page_title="Dashboard")
+
+
 st.title("Youth Missionary Dashboard")
+
 
 # Table: YouthFormData ordered by highest total points
 youth_entries = YouthFormDataRepository.get_all()

@@ -1,12 +1,19 @@
-# import streamlit and database functions
 import streamlit as st
-import sys
-import os
-sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
+
+from utils import check_password
 from database import YouthFormDataRepository, TasksFormDataRepository
 from database import CompiledFormDataRepository
 
+
+st.set_page_config(page_title="Data")
+
+
+if not check_password():
+    st.stop()
+
+
 st.title("Youth Form Data")
+
 
 with st.expander("Add New Entry", expanded=True):
 	with st.form("entry_form"):
@@ -20,7 +27,7 @@ with st.expander("Add New Entry", expanded=True):
 			YouthFormDataRepository.store(name, age, organization, total_points)
 			st.success("Entry added!")
 
-# Display stored entries
+
 col1, col2 = st.columns([4,1])
 with col1:
 	st.header("Stored Entries")
@@ -52,10 +59,10 @@ if entries:
 else:
 	st.info("No entries stored yet.")
 
-# Tasks Form Data
+
 st.title("Tasks Form Data")
 
-# Form for adding tasks
+
 with st.expander("Add New Task", expanded=True):
 	with st.form("task_entry_form"):
 		tasks = st.text_input("Task Name")
@@ -67,7 +74,7 @@ with st.expander("Add New Task", expanded=True):
 			TasksFormDataRepository.store(tasks, points, repeatable)
 			st.success("Task added!")
 
-# Display stored tasks
+
 st.header("Stored Tasks")
 task_entries = TasksFormDataRepository.get_all()
 if task_entries:
