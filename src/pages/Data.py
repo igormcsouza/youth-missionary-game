@@ -12,27 +12,27 @@ if not check_password():
     st.stop()
 
 
-st.title("Youth Form Data")
+st.title("Cadastro de Jovens")
 
 
-with st.expander("Add New Entry", expanded=True):
+with st.expander("Adicionar Cadastro", expanded=True):
 	with st.form("entry_form"):
-		name = st.text_input("Name")
-		age = st.number_input("Age", min_value=0, max_value=120, step=1)
-		organization = st.selectbox("Organization", ["Young Man", "Young Woman"])
-		total_points = 0  # Not editable by user
-		submitted = st.form_submit_button("Add Entry")
+		name = st.text_input("Nome")
+		age = st.number_input("Idade", min_value=0, max_value=120, step=1)
+		organization = st.selectbox("Organização", ["Rapaz", "Moça"])
+		total_points = 0  # Not editable
+		submitted = st.form_submit_button("Adicionar Cadastro")
 
 		if submitted:
 			YouthFormDataRepository.store(name, age, organization, total_points)
-			st.success("Entry added!")
+			st.success("Cadastro adicionado!")
 
 
 col1, col2 = st.columns([4,1])
 with col1:
-	st.header("Stored Entries")
+	st.header("Cadastros Salvos")
 with col2:
-	if st.button("Update Total Points"):
+	if st.button("Atualizar Pontuação Total"):
 		compiled_entries = CompiledFormDataRepository.get_all()
 
 		task_by_id = {t.id: t for t in TasksFormDataRepository.get_all()}
@@ -50,40 +50,40 @@ entries = YouthFormDataRepository.get_all()
 if entries:
 	st.table([
 		{
-			"Name": e.name,
-			"Age": e.age,
-			"Organization": e.organization,
-			"Total Points": e.total_points
+			"Nome": e.name,
+			"Idade": e.age,
+			"Organização": e.organization,
+			"Pontuação Total": e.total_points
 		} for e in entries
 	])
 else:
-	st.info("No entries stored yet.")
+	st.info("Nenhum cadastro salvo ainda.")
 
 
-st.title("Tasks Form Data")
+st.title("Cadastro de Tarefas")
 
 
-with st.expander("Add New Task", expanded=True):
+with st.expander("Adicionar Nova Tarefa", expanded=True):
 	with st.form("task_entry_form"):
-		tasks = st.text_input("Task Name")
-		points = st.number_input("Points", min_value=0, step=1)
-		repeatable = st.checkbox("Repeatable")
-		submitted_task = st.form_submit_button("Add Task")
+		tasks = st.text_input("Nome da Tarefa")
+		points = st.number_input("Pontuação", min_value=0, step=1)
+		repeatable = st.checkbox("Repetível")
+		submitted_task = st.form_submit_button("Adicionar Tarefa")
 
 		if submitted_task:
 			TasksFormDataRepository.store(tasks, points, repeatable)
-			st.success("Task added!")
+			st.success("Tarefa adicionada!")
 
 
-st.header("Stored Tasks")
+st.header("Tarefas Salvas")
 task_entries = TasksFormDataRepository.get_all()
 if task_entries:
 	st.table([
 		{
-			"Task": t.tasks,
-			"Points": t.points,
-			"Repeatable": t.repeatable
+			"Tarefa": t.tasks,
+			"Pontuação": t.points,
+			"Repetível": "Sim" if t.repeatable else "Não"
 		} for t in task_entries
 	])
 else:
-	st.info("No tasks stored yet.")
+	st.info("Nenhuma tarefa salva ainda.")
