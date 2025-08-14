@@ -72,7 +72,7 @@ if compiled_entries:
 			"Data": datetime.fromtimestamp(e.timestamp).strftime("%d/%m/%Y"),
 			"Quantidade": e.quantity,
 			"Bônus": e.bonus,
-			"Pontuação Total": e.quantity * (task_by_id.get(e.task_id).points if task_by_id.get(e.task_id) else 0) + e.bonus
+			"Pontuação Total": e.quantity * (task_by_id.get(e.task_id).points if task_by_id.get(e.task_id) else 0) + e.bonus # type: ignore
 		} for e in compiled_entries
 	])
 	st.dataframe(df_compiled, hide_index=True)

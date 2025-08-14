@@ -1,14 +1,20 @@
 import os
+import secrets
 
 import streamlit as st
 
 
 def check_password():
     """Returns `True` if the user entered the correct password."""
+    auth_password = os.environ.get("AUTH")
+
+    if auth_password is None:
+        st.error("Authentication is not configured. Please set the AUTH environment variable.")
+        return False
 
     def password_entered():
         """Checks whether a password entered by the user is correct."""
-        if secrets.compare_digest(st.session_state["password"], os.environ.get("AUTH", "")):
+        if secrets.compare_digest(st.session_state["password"], auth_password):
             st.session_state["password_correct"] = True
             del st.session_state["password"]
         else:
