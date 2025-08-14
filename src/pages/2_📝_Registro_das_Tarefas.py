@@ -1,3 +1,4 @@
+# Page: Registrar
 import time
 from datetime import datetime
 
@@ -7,7 +8,7 @@ from utils import check_password
 from database import YouthFormDataRepository, TasksFormDataRepository, CompiledFormDataRepository
 
 
-st.set_page_config(page_title="Registrar")
+st.set_page_config(page_title="Registros das Tarefas", page_icon="📝")
 
 
 if not check_password():

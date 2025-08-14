@@ -1,3 +1,4 @@
+# Page: Dados
 import streamlit as st
 
 from utils import check_password
@@ -5,7 +6,7 @@ from database import YouthFormDataRepository, TasksFormDataRepository
 from database import CompiledFormDataRepository
 
 
-st.set_page_config(page_title="Data")
+st.set_page_config(page_title="Dados dos Jovens e Tarefas", page_icon="📁")
 
 
 if not check_password():
@@ -19,7 +20,7 @@ with st.expander("Adicionar Cadastro", expanded=True):
 	with st.form("entry_form"):
 		name = st.text_input("Nome")
 		age = st.number_input("Idade", min_value=0, max_value=120, step=1)
-		organization = st.selectbox("Organização", ["Rapaz", "Moça"])
+		organization = st.selectbox("Organização", ["Rapazes", "Moças"])
 		total_points = 0  # Not editable
 		submitted = st.form_submit_button("Adicionar Cadastro")
 

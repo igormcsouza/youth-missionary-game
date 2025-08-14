@@ -1,3 +1,4 @@
+# Page: Dashboard
 import pandas as pd
 import streamlit as st
 import plotly.graph_objects as go
@@ -5,7 +6,7 @@ import plotly.graph_objects as go
 from database import YouthFormDataRepository, TasksFormDataRepository, CompiledFormDataRepository
 
 
-st.set_page_config(page_title="Dashboard")
+st.set_page_config(page_title="Dashboard", page_icon="📊")
 
 
 st.title("Painel de Jovens Missionários")
@@ -13,7 +14,9 @@ st.title("Painel de Jovens Missionários")
 
 # Table: YouthFormData ordered by highest total points
 youth_entries = YouthFormDataRepository.get_all()
-sorted_youth = sorted(youth_entries, key=lambda y: y.total_points, reverse=True)
+filtered_youth = [y for y in youth_entries if y.total_points > 0]
+sorted_youth = sorted(filtered_youth, key=lambda y: y.total_points, reverse=True)
+
 st.header("Ranking dos Jovens por Pontuação Total")
 if sorted_youth:
     st.table([
