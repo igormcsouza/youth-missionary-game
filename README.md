@@ -1,44 +1,119 @@
-# Youth Missionary Game Streamlit App
+# Youth Missionary Game
 
-This is a Streamlit application designed as a youth missionary game, providing interactive activities and resources to engage young participants in missionary work.
+[![Deploy to Fly.io](https://github.com/igormcsouza/youth-missionary-game/actions/workflows/deploy.yml/badge.svg)](https://github.com/igormcsouza/youth-missionary-game/actions/workflows/deploy.yml)
 
-## Project Structure
+A Streamlit-based web application for managing youth missionary competitions. This app allows you to register youth participants, create tasks with scoring systems, track task completions, and view interactive dashboards with rankings and statistics.
 
-```
-my-streamlit-app
-├── src
-│   └── app.py
-├── requirements.txt
-├── fly.toml
-└── README.md
-```
+## Features
 
-## Setup Instructions
+- **Youth Registration**: Register participants with name, age, and organization (Rapazes/Moças)
+- **Task Management**: Create tasks with customizable points and repeatability settings
+- **Task Tracking**: Record task completions with quantity and bonus points
+- **Interactive Dashboard**: View rankings, statistics, and charts
+- **Database Support**: SQLite for development, PostgreSQL for production
+- **Authentication**: Password protection for admin functions
+- **Automatic Deployment**: Continuous deployment to Fly.io
 
-1. Clone the repository:
+## Quick Start
+
+1. **Clone the repository:**
+   ```bash
+   git clone https://github.com/igormcsouza/youth-missionary-game.git
+   cd youth-missionary-game
    ```
-   git clone <repository-url>
-   cd my-streamlit-app
-   ```
 
-2. Install the required dependencies:
-   ```
+2. **Install dependencies:**
+   ```bash
    pip install -r requirements.txt
    ```
 
-3. Run the Streamlit app:
+3. **Set up authentication (optional for development):**
+   ```bash
+   export AUTH="your-password-here"
    ```
+
+4. **Run the application:**
+   ```bash
    streamlit run src/Dashboard.py
    ```
 
+5. **Open your browser and navigate to:** `http://localhost:8501`
+
+## Development Setup
+
+### Database Configuration
+
+The application uses SQLite by default for local development. For production or testing with PostgreSQL:
+
+1. **Set up PostgreSQL connection:**
+   ```bash
+   export POSTGRESCONNECTIONSTRING="postgresql://user:password@host:port/database"
+   ```
+
+2. **Create a database proxy for development (if using Fly.io PostgreSQL):**
+   ```bash
+   flyctl proxy 5430:5432 -a youth-missionary-game-database
+   ```
+   Then connect using: `postgresql://user:password@localhost:5430/database`
+
+### Environment Variables
+
+- `AUTH` - Password for accessing admin functions (required in production)
+- `POSTGRESCONNECTIONSTRING` - PostgreSQL connection string (optional, defaults to SQLite)
+
+### Project Structure
+
+The application follows a standard Streamlit multi-page structure:
+
+- `src/Dashboard.py` - Main dashboard with rankings and statistics
+- `src/pages/1_📁_Dados_da_Gincana.py` - Youth and task registration
+- `src/pages/2_📝_Registro_das_Tarefas.py` - Task completion tracking
+- `src/database.py` - Database models and repositories
+- `src/utils.py` - Utility functions including authentication
+
 ## Deployment
 
-To deploy the application to Fly.io, ensure you have the Fly CLI installed and configured. Then, run the following command:
+### Automatic Deployment
 
-```
-fly deploy
+The application automatically deploys to Fly.io on every push to the main branch via GitHub Actions.
+
+### Manual Deployment
+
+1. **Install Fly CLI and authenticate:**
+   ```bash
+   flyctl auth login
+   ```
+
+2. **Deploy the application:**
+   ```bash
+   flyctl deploy
+   ```
+
+### Environment Setup for Production
+
+Set the following secrets in your Fly.io app:
+```bash
+flyctl secrets set AUTH="your-production-password"
+flyctl secrets set POSTGRESCONNECTIONSTRING="your-postgres-connection-string"
 ```
 
 ## Usage
 
-After running the app, open your web browser and navigate to `http://localhost:8501` to view the application. You should see an interactive dashboard with charts, tables, and controls for exploring your data.
+1. **Access the application** - Navigate to the deployed URL or localhost:8501
+2. **Enter password** - Use the AUTH environment variable password
+3. **Register participants** - Go to "📁 Dados da Gincana" to add youth and tasks
+4. **Track activities** - Use "📝 Registro das Tarefas" to record task completions
+5. **View results** - Check the main Dashboard for rankings and statistics
+
+## Contributing
+
+1. Fork the repository
+2. Create a feature branch: `git checkout -b feature-name`
+3. Make your changes and test locally
+4. Commit your changes: `git commit -am 'Add some feature'`
+5. Push to the branch: `git push origin feature-name`
+6. Submit a pull request
+
+## License
+
+This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
