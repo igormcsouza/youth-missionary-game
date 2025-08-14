@@ -63,6 +63,6 @@ else:
         "Organização": ["Rapazes", "Moças"],
         "Pontuação Total": [young_man_points, young_woman_points]
     })
-    bar_fig = go.Figure(data=[go.Bar(x=bar_df["Organização"], y=bar_df["Pontuação Total"], marker_color=["#1f77b4", "#e75480"] )])
+    bar_fig = go.Figure(data=[go.Bar(x=bar_df["Organização"], y=bar_df["Pontuação Total"], marker_color=[COLOR_RAPAZES, COLOR_MOCAS] )])
     bar_fig.update_layout(yaxis_title="Pontuação Total", xaxis_title="Organização")
     st.plotly_chart(bar_fig, use_container_width=True)
