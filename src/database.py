@@ -2,6 +2,7 @@ import os
 from typing import Optional, Sequence
 
 from sqlmodel import SQLModel, Field, create_engine, Session, select
+from utils import handle_database_operation
 
 
 # Define the model for YouthFormData
@@ -18,8 +19,6 @@ class YouthFormData(SQLModel, table=True):
 class YouthFormDataRepository:
     @staticmethod
     def update_total_points(youth_id: int, new_total: int):
-        from utils import handle_database_operation
-        
         def _update_operation():
             with Session(engine) as session:
                 entry = session.get(YouthFormData, youth_id)
@@ -37,8 +36,6 @@ class YouthFormDataRepository:
     
     @staticmethod
     def store(name: str, age: int, organization: str, total_points: int) -> Optional[YouthFormData]:
-        from utils import handle_database_operation
-        
         def _store_operation():
             entry = YouthFormData(name=name, age=age, organization=organization, total_points=total_points)
             with Session(engine) as session:
@@ -54,8 +51,6 @@ class YouthFormDataRepository:
 
     @staticmethod
     def get_all() -> Sequence[YouthFormData]:
-        from utils import handle_database_operation
-        
         def _get_all_operation():
             with Session(engine) as session:
                 statement = select(YouthFormData)
@@ -70,8 +65,6 @@ class YouthFormDataRepository:
 
     @staticmethod
     def delete(entry_id: int) -> bool:
-        from utils import handle_database_operation
-        
         def _delete_operation():
             with Session(engine) as session:
                 entry = session.get(YouthFormData, entry_id)
@@ -98,8 +91,6 @@ class TasksFormData(SQLModel, table=True):
 class TasksFormDataRepository:
     @staticmethod
     def store(tasks: str, points: int, repeatable: bool) -> Optional[TasksFormData]:
-        from utils import handle_database_operation
-        
         def _store_operation():
             entry = TasksFormData(tasks=tasks, points=points, repeatable=repeatable)
             with Session(engine) as session:
@@ -115,8 +106,6 @@ class TasksFormDataRepository:
 
     @staticmethod
     def get_all() -> Sequence[TasksFormData]:
-        from utils import handle_database_operation
-        
         def _get_all_operation():
             with Session(engine) as session:
                 statement = select(TasksFormData)
@@ -131,8 +120,6 @@ class TasksFormDataRepository:
 
     @staticmethod
     def delete(entry_id: int) -> bool:
-        from utils import handle_database_operation
-        
         def _delete_operation():
             with Session(engine) as session:
                 entry = session.get(TasksFormData, entry_id)
@@ -160,8 +147,6 @@ class CompiledFormData(SQLModel, table=True):
 class CompiledFormDataRepository:
     @staticmethod
     def store(youth_id: int, task_id: int, timestamp: float, quantity: int, bonus: int) -> Optional[CompiledFormData]:
-        from utils import handle_database_operation
-        
         def _store_operation():
             entry = CompiledFormData(
                 youth_id=youth_id,
@@ -183,8 +168,6 @@ class CompiledFormDataRepository:
 
     @staticmethod
     def get_all() -> Sequence[CompiledFormData]:
-        from utils import handle_database_operation
-        
         def _get_all_operation():
             with Session(engine) as session:
                 statement = select(CompiledFormData)
@@ -199,8 +182,6 @@ class CompiledFormDataRepository:
 
     @staticmethod
     def delete(entry_id: int) -> bool:
-        from utils import handle_database_operation
-        
         def _delete_operation():
             with Session(engine) as session:
                 entry = session.get(CompiledFormData, entry_id)
