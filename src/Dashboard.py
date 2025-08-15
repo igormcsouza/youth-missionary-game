@@ -69,7 +69,7 @@ if any(total > 0 for total in activity_totals.values()):
         ("Livros de Mórmon", "📖", activity_totals["Livros de Mórmon entregues"], activity_deltas["Livros de Mórmon entregues"]),
         ("Pessoas na igreja", "⛪", activity_totals["Pessoas levadas à igreja"], activity_deltas["Pessoas levadas à igreja"]),
         ("Batismos", "🛁", activity_totals["Batismos"], activity_deltas["Batismos"]),
-        ("Posts evangélicos", "📱", activity_totals["Posts nas redes sociais"], activity_deltas["Posts nas redes sociais"]),
+        ("Posts", "📱", activity_totals["Posts nas redes sociais"], activity_deltas["Posts nas redes sociais"]),
         ("Noites familiares", "🏠", activity_totals["Sessões de noite familiar"], activity_deltas["Sessões de noite familiar"])
     ]
     
