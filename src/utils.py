@@ -22,18 +22,13 @@ def check_password():
 
     # First run: ask for password
     if "password_correct" not in st.session_state:
-        st.text_input("Password", type="password", on_change=password_entered, key="password")
-        return False
-
-    # Wrong password
-    elif not st.session_state["password_correct"]:
         st.text_input("Senha", type="password", on_change=password_entered, key="password")
         return False
 
     # Wrong password
     elif not st.session_state["password_correct"]:
         st.text_input("Senha", type="password", on_change=password_entered, key="password")
-        st.error("Senha incorreta")
+        st.error("❌ Senha incorreta. Entre em contato para obter uma nova senha!")
         return False
 
     # Correct password
