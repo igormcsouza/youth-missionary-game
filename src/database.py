@@ -1,4 +1,5 @@
 import os
+import datetime as dt
 from typing import Optional, Sequence
 
 from sqlmodel import SQLModel, Field, create_engine, Session, select
@@ -184,7 +185,6 @@ class CompiledFormDataRepository:
     def has_entry_today(youth_id: int, task_id: int) -> bool:
         """Check if there's already an entry for the same youth and task on the same day"""
         def _check_operation():
-            import datetime as dt
             today = dt.date.today()
             today_start = dt.datetime.combine(today, dt.time.min)
             tomorrow_start = today_start + dt.timedelta(days=1)

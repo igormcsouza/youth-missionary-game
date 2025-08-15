@@ -38,7 +38,7 @@ is_repeatable = selected_task.repeatable if selected_task else True
 
 # Show warning for non-repeatable tasks
 if selected_task_id and not is_repeatable:
-	st.info("⚠️ Esta tarefa não é repetível - apenas 1 entrada por dia é permitida para cada jovem.")
+	st.info("⚠️ Esta tarefa não é repetível - apenas 1 entrada por semana é permitida para cada jovem.")
 
 with st.form("compiled_form"):
 	# Use hidden inputs for form consistency
@@ -60,7 +60,7 @@ with st.form("compiled_form"):
 			# Check if there's already an entry today for this youth and task
 			has_entry_today = CompiledFormDataRepository.has_entry_today(selected_youth_id, selected_task_id)
 			if has_entry_today:
-				st.error("❌ Esta tarefa não é repetível e já foi registrada hoje para este jovem. Apenas uma entrada por dia é permitida.")
+				st.error("❌ Esta tarefa não é repetível e já foi registrada hoje para este jovem. Apenas uma entrada por semana é permitida.")
 			else:
 				# Force quantity to 1 for non-repeatable tasks
 				quantity = 1
