@@ -31,31 +31,74 @@ task_by_id = {t.id: t for t in task_entries}
 with st.form("compiled_form"):
 	selected_youth_id = st.selectbox("Selecionar Jovem", options=list(youth_options.keys()), format_func=lambda x: youth_options[x] if x in youth_options else "")
 	selected_task_id = st.selectbox("Selecionar Tarefa", options=list(task_options.keys()), format_func=lambda x: task_options[x] if x in task_options else "")
-	quantity = st.number_input("Quantidade", min_value=1, step=1)
+	
+	# Check if selected task is repeatable
+	selected_task = task_by_id.get(selected_task_id) if selected_task_id else None
+	is_repeatable = selected_task.repeatable if selected_task else True
+	
+	# Adjust quantity input based on task repeatability
+	if is_repeatable:
+		quantity = st.number_input("Quantidade", min_value=1, step=1)
+	else:
+		st.info("⚠️ Esta tarefa não é repetível - apenas 1 entrada por dia é permitida.")
+		quantity = st.number_input("Quantidade", min_value=1, max_value=1, value=1, step=1, disabled=True)
+	
 	bonus = st.number_input("Bônus", min_value=0, step=1)
 	submitted = st.form_submit_button("Registrar Entrada")
 
 	if submitted and selected_youth_id and selected_task_id:
-		result = CompiledFormDataRepository.store(
-			youth_id=selected_youth_id,
-			task_id=selected_task_id,
-			timestamp=time.time(),
-			quantity=quantity,
-			bonus=bonus
-		)
-		if result is not None:
-			# Recalculate total points for the selected youth
-			compiled_entries = CompiledFormDataRepository.get_all()
-			total_points = 0
-			for entry in compiled_entries:
-				if entry.youth_id == selected_youth_id:
-					task = task_by_id.get(entry.task_id)
-					if task:
-						total_points += task.points * entry.quantity + entry.bonus
-			update_result = YouthFormDataRepository.update_total_points(selected_youth_id, total_points)
-			if update_result is not None:
-				st.success("Entrada registrada e pontuação total do jovem atualizada!")
-				st.rerun()
+		# Validate non-repeatable tasks
+		if not is_repeatable:
+			# Check if there's already an entry today for this youth and task
+			has_entry_today = CompiledFormDataRepository.has_entry_today(selected_youth_id, selected_task_id)
+			if has_entry_today:
+				st.error("❌ Esta tarefa não é repetível e já foi registrada hoje para este jovem. Apenas uma entrada por dia é permitida.")
+			else:
+				# Force quantity to 1 for non-repeatable tasks
+				quantity = 1
+				# Proceed with storing the entry
+				result = CompiledFormDataRepository.store(
+					youth_id=selected_youth_id,
+					task_id=selected_task_id,
+					timestamp=time.time(),
+					quantity=quantity,
+					bonus=bonus
+				)
+				if result is not None:
+					# Recalculate total points for the selected youth
+					compiled_entries = CompiledFormDataRepository.get_all()
+					total_points = 0
+					for entry in compiled_entries:
+						if entry.youth_id == selected_youth_id:
+							task = task_by_id.get(entry.task_id)
+							if task:
+								total_points += task.points * entry.quantity + entry.bonus
+					update_result = YouthFormDataRepository.update_total_points(selected_youth_id, total_points)
+					if update_result is not None:
+						st.success("Entrada registrada e pontuação total do jovem atualizada!")
+						st.rerun()
+		else:
+			# For repeatable tasks, proceed normally
+			result = CompiledFormDataRepository.store(
+				youth_id=selected_youth_id,
+				task_id=selected_task_id,
+				timestamp=time.time(),
+				quantity=quantity,
+				bonus=bonus
+			)
+			if result is not None:
+				# Recalculate total points for the selected youth
+				compiled_entries = CompiledFormDataRepository.get_all()
+				total_points = 0
+				for entry in compiled_entries:
+					if entry.youth_id == selected_youth_id:
+						task = task_by_id.get(entry.task_id)
+						if task:
+							total_points += task.points * entry.quantity + entry.bonus
+				update_result = YouthFormDataRepository.update_total_points(selected_youth_id, total_points)
+				if update_result is not None:
+					st.success("Entrada registrada e pontuação total do jovem atualizada!")
+					st.rerun()
 			# Error messages are handled by the repository methods
 
 
