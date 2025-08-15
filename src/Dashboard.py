@@ -15,9 +15,7 @@ st.title("Painel de Jovens Missionários")
 # Helper function to calculate last Sunday
 def get_last_sunday():
     today = datetime.now()
-    days_since_sunday = today.weekday() + 1  # Monday = 0, Sunday = 6, so +1 makes Sunday = 0
-    if days_since_sunday == 7:  # Today is Sunday
-        days_since_sunday = 0
+    days_since_sunday = today.weekday() + 1  # Monday = 1, Tuesday = 2, ..., Sunday = 7
     last_sunday = today - timedelta(days=days_since_sunday)
     # Set to beginning of Sunday
     return last_sunday.replace(hour=0, minute=0, second=0, microsecond=0)
