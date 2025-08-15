@@ -1,7 +1,11 @@
 import os
 import secrets
+from typing import Callable, TypeVar, Optional
+import logging
 
 import streamlit as st
+
+T = TypeVar('T')
 
 
 def check_password():
@@ -34,3 +38,34 @@ def check_password():
     # Correct password
     else:
         return True
+
+
+def handle_database_operation(operation: Callable[[], T], operation_name: str = "operação do banco de dados") -> Optional[T]:
+    """
+    Handles database operations with user-friendly error messages.
+    
+    Args:
+        operation: The database operation function to execute
+        operation_name: Description of the operation for error messages
+    
+    Returns:
+        The result of the operation, or None if an error occurred
+    """
+    try:
+        return operation()
+    except Exception as e:
+        # Log the actual error for debugging
+        logging.error(f"Database operation '{operation_name}' failed: {str(e)}")
+        
+        # Show user-friendly message
+        st.info(f"""
+        🔄 **Problema temporário com o banco de dados**
+        
+        Houve uma dificuldade ao executar a {operation_name}. Isso pode acontecer ocasionalmente devido a:
+        - Tempo limite de conexão
+        - Sobrecarga temporária do banco
+        - Problemas de rede
+        
+        **💡 Solução simples:** Atualize a página (F5) para tentar novamente.
+        """)
+        return None

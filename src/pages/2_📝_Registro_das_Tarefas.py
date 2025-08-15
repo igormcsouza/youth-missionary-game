@@ -36,24 +36,27 @@ with st.form("compiled_form"):
 	submitted = st.form_submit_button("Registrar Entrada")
 
 	if submitted and selected_youth_id and selected_task_id:
-		CompiledFormDataRepository.store(
+		result = CompiledFormDataRepository.store(
 			youth_id=selected_youth_id,
 			task_id=selected_task_id,
 			timestamp=time.time(),
 			quantity=quantity,
 			bonus=bonus
 		)
-		# Recalculate total points for the selected youth
-		compiled_entries = CompiledFormDataRepository.get_all()
-		total_points = 0
-		for entry in compiled_entries:
-			if entry.youth_id == selected_youth_id:
-				task = task_by_id.get(entry.task_id)
-				if task:
-					total_points += task.points * entry.quantity + entry.bonus
-		YouthFormDataRepository.update_total_points(selected_youth_id, total_points)
-		st.success("Entrada registrada e pontuação total do jovem atualizada!")
-		st.rerun()
+		if result is not None:
+			# Recalculate total points for the selected youth
+			compiled_entries = CompiledFormDataRepository.get_all()
+			total_points = 0
+			for entry in compiled_entries:
+				if entry.youth_id == selected_youth_id:
+					task = task_by_id.get(entry.task_id)
+					if task:
+						total_points += task.points * entry.quantity + entry.bonus
+			update_result = YouthFormDataRepository.update_total_points(selected_youth_id, total_points)
+			if update_result is not None:
+				st.success("Entrada registrada e pontuação total do jovem atualizada!")
+				st.rerun()
+			# Error messages are handled by the repository methods
 
 
 # Display stored compiled entries

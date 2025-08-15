@@ -25,8 +25,10 @@ with st.expander("Adicionar Cadastro", expanded=True):
 		submitted = st.form_submit_button("Adicionar Cadastro")
 
 		if submitted:
-			YouthFormDataRepository.store(name, age, organization, total_points)
-			st.success("Cadastro adicionado!")
+			result = YouthFormDataRepository.store(name, age, organization, total_points)
+			if result is not None:
+				st.success("Cadastro adicionado!")
+			# Error message is handled by the repository method
 
 
 col1, col2 = st.columns([4,1])
@@ -73,8 +75,10 @@ with st.expander("Adicionar Nova Tarefa", expanded=True):
 		submitted_task = st.form_submit_button("Adicionar Tarefa")
 
 		if submitted_task:
-			TasksFormDataRepository.store(tasks, points, repeatable)
-			st.success("Tarefa adicionada!")
+			result = TasksFormDataRepository.store(tasks, points, repeatable)
+			if result is not None:
+				st.success("Tarefa adicionada!")
+			# Error message is handled by the repository method
 
 
 st.header("Tarefas Salvas")
