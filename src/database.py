@@ -1,4 +1,5 @@
 import os
+import datetime as dt
 from typing import Optional, Sequence
 
 from sqlmodel import SQLModel, Field, create_engine, Session, select
@@ -179,6 +180,33 @@ class CompiledFormDataRepository:
             "busca dos registros de tarefas"
         )
         return result if result is not None else []
+
+    @staticmethod
+    def has_entry_today(youth_id: int, task_id: int) -> bool:
+        """Check if there's already an entry for the same youth and task on the same day"""
+        def _check_operation():
+            today = dt.date.today()
+            today_start = dt.datetime.combine(today, dt.time.min)
+            tomorrow_start = today_start + dt.timedelta(days=1)
+            
+            today_start_timestamp = today_start.timestamp()
+            tomorrow_start_timestamp = tomorrow_start.timestamp()
+            
+            with Session(engine) as session:
+                statement = select(CompiledFormData).where(
+                    CompiledFormData.youth_id == youth_id,
+                    CompiledFormData.task_id == task_id,
+                    CompiledFormData.timestamp >= today_start_timestamp,
+                    CompiledFormData.timestamp < tomorrow_start_timestamp
+                )
+                result = session.exec(statement).first()
+                return result is not None
+        
+        result = handle_database_operation(
+            _check_operation,
+            "verificação de entrada existente no dia"
+        )
+        return result if result is not None else False
 
     @staticmethod
     def delete(entry_id: int) -> bool:
