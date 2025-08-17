@@ -72,6 +72,7 @@ with st.form("compiled_form"):
 				update_result = YouthFormDataRepository.update_total_points(selected_youth_id, total_points)
 				if update_result is not None:
 					st.success("Entrada registrada e pontuação total do jovem atualizada!")
+					st.rerun()  # Refresh the page to show updated entries
 			# Error messages are handled by the repository methods
 
 
