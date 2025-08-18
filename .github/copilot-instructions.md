@@ -7,7 +7,7 @@ Always reference these instructions first and fallback to search or bash command
 ## Working Effectively
 
 ### Bootstrap and Dependencies
-- Install Python dependencies: `pip install -r requirements.txt` -- takes 60 seconds to complete. NEVER CANCEL. Set timeout to 120+ seconds.
+- Install Python dependencies: `pip install -r requirements.txt` -- takes 30 seconds to complete. NEVER CANCEL. Set timeout to 120+ seconds.
 - **CRITICAL**: Python 3.12+ is required and tested. The application uses modern Python features.
 
 ### Running the Application
@@ -17,10 +17,10 @@ Always reference these instructions first and fallback to search or bash command
 - **AUTHENTICATION REQUIRED**: All management pages (except Dashboard) require entering the AUTH password
 
 ### Docker Operations
-- Build Docker image: `docker build -t youth-missionary-game .` -- takes 60 seconds to complete. NEVER CANCEL. Set timeout to 120+ seconds.
-- **CRITICAL**: In isolated environments, Docker builds may fail with SSL errors. Use this workaround:
+- Build Docker image: `docker build --build-arg PIP_TRUSTED_HOST=1 -t youth-missionary-game .` -- takes 30 seconds to complete. NEVER CANCEL. Set timeout to 120+ seconds.
+- **CRITICAL**: In isolated environments, Docker builds WILL fail with SSL errors. ALWAYS use this workaround:
   ```bash
-  docker build --build-arg PIP_TRUSTED_HOST="pypi.org pypi.python.org files.pythonhosted.org" -t youth-missionary-game .
+  docker build --build-arg PIP_TRUSTED_HOST=1 -t youth-missionary-game .
   ```
 - Run containerized app: `docker run -p 8080:8080 -e AUTH=your_password youth-missionary-game`
 
@@ -69,16 +69,16 @@ Always reference these instructions first and fallback to search or bash command
 
 ### Development Setup (First Time)
 ```bash
-# Setup takes ~60 seconds total
+# Setup takes ~30 seconds total
 export AUTH=your_password_here
-pip install -r requirements.txt  # 60 seconds
+pip install -r requirements.txt  # 30 seconds
 streamlit run src/Dashboard.py   # <5 seconds to start
 ```
 
 ### Docker Deployment Testing
 ```bash
-# Build and test takes ~70 seconds total
-docker build -t youth-missionary-game .  # 60 seconds
+# Build and test takes ~40 seconds total
+docker build --build-arg PIP_TRUSTED_HOST=1 -t youth-missionary-game .  # 30 seconds
 docker run -p 8080:8080 -e AUTH=test youth-missionary-game  # <10 seconds
 ```
 
@@ -107,6 +107,6 @@ python -m py_compile src/*.py src/pages/*.py
 
 ## Troubleshooting
 - **"Password field not in form" console warning**: This is expected behavior, can be ignored
-- **SSL certificate errors during Docker build**: Use `--trusted-host` pip flags
+- **SSL certificate errors during Docker build**: ALWAYS use `--build-arg PIP_TRUSTED_HOST=1` flag
 - **Empty dropdowns in task recording**: Ensure youth and tasks are created first in management page
 - **Database connection errors**: Check POSTGRESCONNECTIONSTRING format or fallback to SQLite default
