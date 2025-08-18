@@ -4,9 +4,84 @@ import sys
 from datetime import datetime, timedelta
 from unittest.mock import patch, MagicMock
 import pandas as pd
+from streamlit.testing.v1 import AppTest
 
 # Import the modules to test
 sys.path.insert(0, os.path.join(os.path.dirname(__file__), '..', 'src'))
+
+
+class TestDashboardStreamlitApp:
+    """Test Dashboard.py using Streamlit testing API"""
+    
+    def test_dashboard_loads_without_error(self):
+        """Test that the dashboard loads without errors"""
+        # Change to src directory for proper imports
+        os.chdir(os.path.join(os.path.dirname(__file__), '..', 'src'))
+        at = AppTest.from_file("Dashboard.py")
+        at.run()
+        assert not at.exception
+    
+    def test_dashboard_title_displayed(self):
+        """Test that the main title is displayed"""
+        os.chdir(os.path.join(os.path.dirname(__file__), '..', 'src'))
+        at = AppTest.from_file("Dashboard.py")
+        at.run()
+        # Check if title exists in any form
+        assert len(at.title) > 0 or len(at.markdown) > 0
+    
+    @patch('database.YouthFormDataRepository.get_all')
+    @patch('database.TasksFormDataRepository.get_all')
+    @patch('database.CompiledFormDataRepository.get_all')
+    def test_dashboard_with_empty_database(self, mock_compiled, mock_tasks, mock_youth):
+        """Test dashboard behavior with empty database"""
+        mock_youth.return_value = []
+        mock_tasks.return_value = []
+        mock_compiled.return_value = []
+        
+        os.chdir(os.path.join(os.path.dirname(__file__), '..', 'src'))
+        at = AppTest.from_file("Dashboard.py")
+        at.run()
+        
+        # Should load without exception
+        assert not at.exception
+    
+    @patch('database.YouthFormDataRepository.get_all')
+    @patch('database.TasksFormDataRepository.get_all')
+    @patch('database.CompiledFormDataRepository.get_all')
+    def test_dashboard_with_sample_data(self, mock_compiled, mock_tasks, mock_youth):
+        """Test dashboard with sample data displays correctly"""
+        # Mock youth data
+        mock_youth_obj = MagicMock()
+        mock_youth_obj.id = 1
+        mock_youth_obj.name = "João Silva"
+        mock_youth_obj.age = 16
+        mock_youth_obj.organization = "Rapazes"
+        mock_youth_obj.total_points = 45
+        mock_youth.return_value = [mock_youth_obj]
+        
+        # Mock task data
+        mock_task_obj = MagicMock()
+        mock_task_obj.id = 1
+        mock_task_obj.tasks = "Read scriptures"
+        mock_task_obj.points = 10
+        mock_task_obj.repeatable = True
+        mock_tasks.return_value = [mock_task_obj]
+        
+        # Mock compiled data
+        mock_compiled_obj = MagicMock()
+        mock_compiled_obj.youth_id = 1
+        mock_compiled_obj.task_id = 1
+        mock_compiled_obj.quantity = 2
+        mock_compiled_obj.bonus = 5
+        mock_compiled_obj.timestamp = datetime.now().timestamp()
+        mock_compiled.return_value = [mock_compiled_obj]
+        
+        os.chdir(os.path.join(os.path.dirname(__file__), '..', 'src'))
+        at = AppTest.from_file("Dashboard.py")
+        at.run()
+        
+        # Should load without exception
+        assert not at.exception
 
 
 class TestDashboardHelperFunctions:
