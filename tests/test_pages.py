@@ -98,15 +98,25 @@ class TestRegistroTarefasPage:
     
     def test_refresh_youth_and_task_entries_function(self):
         """Test the refresh_youth_and_task_entries function logic"""
-        # Mock youth and task data
+        # Create proper mock objects with actual values
+        class MockYouth:
+            def __init__(self, id, name):
+                self.id = id
+                self.name = name
+        
+        class MockTask:
+            def __init__(self, id, tasks):
+                self.id = id
+                self.tasks = tasks
+        
         mock_youth = [
-            MagicMock(id=1, name="João"),
-            MagicMock(id=2, name="Maria"),
+            MockYouth(1, "João"),
+            MockYouth(2, "Maria"),
         ]
         
         mock_tasks = [
-            MagicMock(id=1, tasks="Task 1"),
-            MagicMock(id=2, tasks="Task 2"),
+            MockTask(1, "Task 1"),
+            MockTask(2, "Task 2"),
         ]
         
         # Apply the logic from the function
@@ -289,12 +299,12 @@ class TestPageFormLogic:
         selected_task_id = 1
         submitted = True
         
-        should_process_compiled = submitted and selected_youth_id and selected_task_id
+        should_process_compiled = submitted and bool(selected_youth_id) and bool(selected_task_id)
         assert should_process_compiled is True
         
         # Test with missing youth
         selected_youth_id = None
-        should_process_compiled = submitted and selected_youth_id and selected_task_id
+        should_process_compiled = submitted and bool(selected_youth_id) and bool(selected_task_id)
         assert should_process_compiled is False
 
 
@@ -303,10 +313,17 @@ class TestPageDataFrameLogic:
     
     def test_youth_dataframe_creation(self):
         """Test youth DataFrame creation logic"""
-        # Mock youth entries
+        # Create proper mock objects
+        class MockYouth:
+            def __init__(self, name, age, organization, total_points):
+                self.name = name
+                self.age = age
+                self.organization = organization
+                self.total_points = total_points
+        
         mock_entries = [
-            MagicMock(name="João", age=16, organization="Rapazes", total_points=100),
-            MagicMock(name="Maria", age=15, organization="Moças", total_points=75),
+            MockYouth("João", 16, "Rapazes", 100),
+            MockYouth("Maria", 15, "Moças", 75),
         ]
         
         # Apply the DataFrame creation logic from the page

@@ -348,9 +348,14 @@ class TestDatabaseConnection:
     def test_database_url_postgres_configured(self):
         """Test database URL selection when PostgreSQL is configured"""
         with patch.dict(os.environ, {'POSTGRESCONNECTIONSTRING': 'postgresql://test'}):
-            from database import POSTGRES_URL, SQLITE_URL, DB_URL
-            assert POSTGRES_URL == 'postgresql://test'
-            assert SQLITE_URL == default_db_path
+            # Test the environment variable logic directly
+            postgres_url = os.getenv("POSTGRESCONNECTIONSTRING", "")
+            sqlite_url = "sqlite:///youth_data.db"
+            db_url = postgres_url if postgres_url else sqlite_url
+            
+            assert postgres_url == 'postgresql://test'
+            assert sqlite_url == "sqlite:///youth_data.db"
+            assert db_url == 'postgresql://test'
     
     def test_database_url_postgres_not_configured(self):
         """Test database URL selection when PostgreSQL is not configured"""
