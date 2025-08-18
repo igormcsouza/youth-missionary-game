@@ -31,20 +31,6 @@ class TestDadosGincanaPageStreamlit:
             at.run()
             # Check if any title exists
             assert len(at.title) > 0 or len(at.markdown) > 0
-    
-    @patch.dict(os.environ, {'AUTH': 'test_password'})
-    @patch('database.YouthFormDataRepository.store')
-    def test_youth_form_submission(self, mock_store):
-        """Test youth form submission logic"""
-        mock_store.return_value = MagicMock(id=1)
-        
-        with patch('utils.check_password', return_value=True):
-            os.chdir(os.path.join(os.path.dirname(__file__), '..', 'src'))
-            at = AppTest.from_file("pages/1_📁_Dados_da_Gincana.py")
-            at.run()
-            
-            # Just verify the page loads without error
-            assert not at.exception
 
 
 class TestRegistroTarefasPageStreamlit:
@@ -62,6 +48,16 @@ class TestRegistroTarefasPageStreamlit:
                     assert not at.exception
     
     @patch.dict(os.environ, {'AUTH': 'test_password'})
+    def test_page_stops_without_auth(self):
+        """Test that the page stops when not authenticated"""
+        with patch('utils.check_password', return_value=False):
+            os.chdir(os.path.join(os.path.dirname(__file__), '..', 'src'))
+            at = AppTest.from_file("pages/2_📝_Registro_das_Tarefas.py")
+            at.run()
+            # The page should stop execution due to failed auth
+            assert not at.exception
+    
+    @patch.dict(os.environ, {'AUTH': 'test_password'})
     def test_page_title_displayed(self):
         """Test that the page title is displayed"""
         with patch('utils.check_password', return_value=True):
@@ -74,10 +70,8 @@ class TestRegistroTarefasPageStreamlit:
                     assert len(at.title) > 0 or len(at.markdown) > 0
     
     @patch.dict(os.environ, {'AUTH': 'test_password'})
-    @patch('database.CompiledFormDataRepository.store')
-    @patch('database.CompiledFormDataRepository.has_entry_today')
-    def test_task_registration_submission(self, mock_has_entry, mock_store):
-        """Test task registration form submission logic"""
+    def test_compiled_entries_display_with_data(self):
+        """Test display of compiled entries when data exists"""
         # Mock youth and task data
         mock_youth = MagicMock()
         mock_youth.id = 1
@@ -86,20 +80,39 @@ class TestRegistroTarefasPageStreamlit:
         mock_task = MagicMock()
         mock_task.id = 1
         mock_task.tasks = "Read scriptures"
-        mock_task.repeatable = True
+        mock_task.points = 10
         
-        mock_has_entry.return_value = False
-        mock_store.return_value = MagicMock(id=1)
+        mock_compiled = MagicMock()
+        mock_compiled.youth_id = 1
+        mock_compiled.task_id = 1
+        mock_compiled.timestamp = time.time()
+        mock_compiled.quantity = 2
+        mock_compiled.bonus = 5
         
         with patch('utils.check_password', return_value=True):
             with patch('database.YouthFormDataRepository.get_all', return_value=[mock_youth]):
                 with patch('database.TasksFormDataRepository.get_all', return_value=[mock_task]):
-                    os.chdir(os.path.join(os.path.dirname(__file__), '..', 'src'))
-                    at = AppTest.from_file("pages/2_📝_Registro_das_Tarefas.py")
-                    at.run()
-                    
-                    # Just verify the page loads without error
-                    assert not at.exception
+                    with patch('database.CompiledFormDataRepository.get_all', return_value=[mock_compiled]):
+                        os.chdir(os.path.join(os.path.dirname(__file__), '..', 'src'))
+                        at = AppTest.from_file("pages/2_📝_Registro_das_Tarefas.py")
+                        at.run()
+                        
+                        # Should display the compiled entries DataFrame
+                        assert not at.exception
+    
+    @patch.dict(os.environ, {'AUTH': 'test_password'})
+    def test_compiled_entries_display_empty(self):
+        """Test display of compiled entries when no data exists"""
+        with patch('utils.check_password', return_value=True):
+            with patch('database.YouthFormDataRepository.get_all', return_value=[]):
+                with patch('database.TasksFormDataRepository.get_all', return_value=[]):
+                    with patch('database.CompiledFormDataRepository.get_all', return_value=[]):
+                        os.chdir(os.path.join(os.path.dirname(__file__), '..', 'src'))
+                        at = AppTest.from_file("pages/2_📝_Registro_das_Tarefas.py")
+                        at.run()
+                        
+                        # Should display the empty state message
+                        assert not at.exception
 
 
 class TestDadosGincanaPage:

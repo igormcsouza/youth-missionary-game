@@ -370,4 +370,7 @@ class TestDatabaseConnection:
     
     def test_default_db_path_constant(self):
         """Test that default database path is correct"""
+        import database
+        assert database.SQLITE_URL.startswith("sqlite:///")
+        assert "youth_data.db" in database.SQLITE_URL
         assert default_db_path == "sqlite:///youth_data.db"
