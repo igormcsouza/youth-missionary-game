@@ -126,20 +126,6 @@ This project includes comprehensive testing with pytest and coverage reporting. 
 
 See [TESTING.md](TESTING.md) for detailed testing documentation.
 
-### Setting Up Code Coverage (Codecov)
-
-To enable coverage reporting with Codecov badges:
-
-1. **Sign up for Codecov**: Go to [codecov.io](https://codecov.io) and sign in with your GitHub account
-2. **Add your repository**: Find `igormcsouza/youth-missionary-game` in your Codecov dashboard
-3. **Get the upload token**: Copy the repository upload token from your Codecov settings
-4. **Add GitHub secret**: 
-   - Go to your GitHub repository Settings → Secrets and variables → Actions
-   - Add a new repository secret named `CODECOV_TOKEN` with the upload token value
-5. **Enable uploads**: The workflow is already configured to upload coverage data automatically
-
-The coverage badge will start working once the first successful upload completes.
-
 ## License
 
 This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
