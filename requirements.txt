@@ -3,3 +3,4 @@ sqlmodel
 plotly
 psycopg2-binary
 pytest
+pytest-cov
