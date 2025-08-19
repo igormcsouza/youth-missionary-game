@@ -1,6 +1,8 @@
 # Youth Missionary Game
 
 [![Deploy to Fly.io](https://github.com/igormcsouza/youth-missionary-game/actions/workflows/deploy.yml/badge.svg)](https://github.com/igormcsouza/youth-missionary-game/actions/workflows/deploy.yml)
+[![Test Suite](https://github.com/igormcsouza/youth-missionary-game/actions/workflows/test.yml/badge.svg)](https://github.com/igormcsouza/youth-missionary-game/actions/workflows/test.yml)
+[![codecov](https://codecov.io/gh/igormcsouza/youth-missionary-game/branch/main/graph/badge.svg)](https://codecov.io/gh/igormcsouza/youth-missionary-game)
 
 A Streamlit-based web application for managing youth missionary competitions. This app allows you to register youth participants, create tasks with scoring systems, track task completions, and view interactive dashboards with rankings and statistics.
 
@@ -113,6 +115,30 @@ flyctl secrets set POSTGRESCONNECTIONSTRING="your-postgres-connection-string"
 4. Commit your changes: `git commit -am 'Add some feature'`
 5. Push to the branch: `git push origin feature-name`
 6. Submit a pull request
+
+### Testing
+
+This project includes comprehensive testing with pytest and coverage reporting. Tests are automatically run on every push and pull request.
+
+- **Run tests locally**: `pytest tests/ --cov=src --cov-report=term-missing -v`
+- **Current coverage**: 87% (target: 85%+)
+- **Test categories**: Unit tests, integration tests, Streamlit UI tests
+
+See [TESTING.md](TESTING.md) for detailed testing documentation.
+
+### Setting Up Code Coverage (Codecov)
+
+To enable coverage reporting with Codecov badges:
+
+1. **Sign up for Codecov**: Go to [codecov.io](https://codecov.io) and sign in with your GitHub account
+2. **Add your repository**: Find `igormcsouza/youth-missionary-game` in your Codecov dashboard
+3. **Get the upload token**: Copy the repository upload token from your Codecov settings
+4. **Add GitHub secret**: 
+   - Go to your GitHub repository Settings → Secrets and variables → Actions
+   - Add a new repository secret named `CODECOV_TOKEN` with the upload token value
+5. **Enable uploads**: The workflow is already configured to upload coverage data automatically
+
+The coverage badge will start working once the first successful upload completes.
 
 ## License
 
