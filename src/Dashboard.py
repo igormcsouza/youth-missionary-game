@@ -30,18 +30,19 @@ def calculate_task_totals():
     target_tasks = {
         "Entregar Livro de Mórmon + foto + relato no grupo": "Livros de Mórmon entregues",
         "Levar amigo à sacramental": "Pessoas levadas à igreja",
-        "Ajudar alguém a se batizar": "Batismos",
+        "Dar contato (tel/endereço) às Sisteres": "Referências",
+        "Visitar com as Sisteres": "Lições",
         "Postar mensagem do evangelho nas redes sociais + print": "Posts nas redes sociais",
         "Fazer noite familiar com pesquisador": "Sessões de noite familiar"
     }
     
-    # Calculate totals and deltas since last Monday
+    # Calculate totals and deltas since last Sunday (week runs Sunday to Saturday)
     totals = {display_name: 0 for display_name in target_tasks.values()}
     deltas = {display_name: 0 for display_name in target_tasks.values()}
     
     last_sunday = get_last_sunday()
-    monday_after_last_sunday = last_sunday + timedelta(days=1)
-    monday_timestamp = monday_after_last_sunday.timestamp()
+    # Week starts on Sunday, not Monday after Sunday
+    sunday_timestamp = last_sunday.timestamp()
     
     for entry in compiled_entries:
         task = task_dict.get(entry.task_id)
@@ -49,8 +50,8 @@ def calculate_task_totals():
             display_name = target_tasks[task.tasks]
             totals[display_name] += entry.quantity
             
-            # Count activities since Monday after last Sunday
-            if entry.timestamp >= monday_timestamp:
+            # Count activities since last Sunday (current week)
+            if entry.timestamp >= sunday_timestamp:
                 deltas[display_name] += entry.quantity
     
     return totals, deltas
@@ -61,12 +62,13 @@ if any(total > 0 for total in activity_totals.values()):
     st.header("Totais das Atividades Missionárias")
     
     # Create columns for the cards
-    cols = st.columns(5)
+    cols = st.columns(6)
     
     activities = [
         ("Livros de Mórmon", "📖", activity_totals["Livros de Mórmon entregues"], activity_deltas["Livros de Mórmon entregues"]),
         ("Pessoas na igreja", "⛪", activity_totals["Pessoas levadas à igreja"], activity_deltas["Pessoas levadas à igreja"]),
-        ("Batismos", "🛁", activity_totals["Batismos"], activity_deltas["Batismos"]),
+        ("Referências", "📞", activity_totals["Referências"], activity_deltas["Referências"]),
+        ("Lições", "👥", activity_totals["Lições"], activity_deltas["Lições"]),
         ("Posts", "📱", activity_totals["Posts nas redes sociais"], activity_deltas["Posts nas redes sociais"]),
         ("Noites familiares", "🏠", activity_totals["Sessões de noite familiar"], activity_deltas["Sessões de noite familiar"])
     ]
@@ -76,7 +78,7 @@ if any(total > 0 for total in activity_totals.values()):
             st.metric(
                 label=f"{icon} {name}",
                 value=str(total),
-                delta=f"+{delta} esta semana" if delta > 0 else None
+                delta=f"+{delta} novos" if delta > 0 else None
             )
 
 
