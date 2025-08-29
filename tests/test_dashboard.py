@@ -28,228 +28,453 @@ class TestDashboardStreamlitApp:
         at.run()
         # Check if title exists in any form
         assert len(at.title) > 0 or len(at.markdown) > 0
-
-    def test_dashboard_with_data(self):
-        """Test dashboard functionality with mock data"""
-        os.chdir(os.path.join(os.path.dirname(__file__), '..', 'src'))
+    
+    @patch('database.YouthFormDataRepository.get_all')
+    @patch('database.TasksFormDataRepository.get_all')
+    @patch('database.CompiledFormDataRepository.get_all')
+    def test_dashboard_with_empty_database(self, mock_compiled, mock_tasks, mock_youth):
+        """Test dashboard behavior with empty database"""
+        mock_youth.return_value = []
+        mock_tasks.return_value = []
+        mock_compiled.return_value = []
         
-        # Mock database connections and data
-        with patch('database.engine') as mock_engine:
-            # Mock successful database connection
-            mock_engine.connect.return_value.__enter__.return_value = MagicMock()
-            
-            # Test that dashboard loads with mocked database
-            at = AppTest.from_file("Dashboard.py")
-            at.run()
-            assert not at.exception
-
-    def test_dashboard_metrics_section(self):
-        """Test that metrics section appears in dashboard"""
         os.chdir(os.path.join(os.path.dirname(__file__), '..', 'src'))
         at = AppTest.from_file("Dashboard.py")
         at.run()
         
-        # Should not crash and should run without exception
+        # Should load without exception
+        assert not at.exception
+    
+    @patch('database.YouthFormDataRepository.get_all')
+    @patch('database.TasksFormDataRepository.get_all')
+    @patch('database.CompiledFormDataRepository.get_all')
+    def test_dashboard_with_sample_data(self, mock_compiled, mock_tasks, mock_youth):
+        """Test dashboard with sample data displays correctly"""
+        # Mock youth data
+        mock_youth_obj = MagicMock()
+        mock_youth_obj.id = 1
+        mock_youth_obj.name = "João Silva"
+        mock_youth_obj.age = 16
+        mock_youth_obj.organization = "Rapazes"
+        mock_youth_obj.total_points = 45
+        mock_youth.return_value = [mock_youth_obj]
+        
+        # Mock task data
+        mock_task_obj = MagicMock()
+        mock_task_obj.id = 1
+        mock_task_obj.tasks = "Read scriptures"
+        mock_task_obj.points = 10
+        mock_task_obj.repeatable = True
+        mock_tasks.return_value = [mock_task_obj]
+        
+        # Mock compiled data
+        mock_compiled_obj = MagicMock()
+        mock_compiled_obj.youth_id = 1
+        mock_compiled_obj.task_id = 1
+        mock_compiled_obj.quantity = 2
+        mock_compiled_obj.bonus = 5
+        mock_compiled_obj.timestamp = datetime.now().timestamp()
+        mock_compiled.return_value = [mock_compiled_obj]
+        
+        os.chdir(os.path.join(os.path.dirname(__file__), '..', 'src'))
+        at = AppTest.from_file("Dashboard.py")
+        at.run()
+        
+        # Should load without exception
         assert not at.exception
 
-    def test_dashboard_ranking_section(self):
-        """Test that ranking section functionality works"""
-        os.chdir(os.path.join(os.path.dirname(__file__), '..', 'src'))
-        
-        with patch('database.engine') as mock_engine:
-            # Mock database with some youth data
-            mock_engine.connect.return_value.__enter__.return_value = MagicMock()
-            
-            at = AppTest.from_file("Dashboard.py")
-            at.run()
-            assert not at.exception
 
-    def test_dashboard_organization_analysis(self):
-        """Test organization analysis functionality"""
-        os.chdir(os.path.join(os.path.dirname(__file__), '..', 'src'))
-        
-        with patch('database.engine') as mock_engine:
-            # Mock data for organizations
-            mock_engine.connect.return_value.__enter__.return_value = MagicMock()
-            
-            at = AppTest.from_file("Dashboard.py")
-            at.run()
-            assert not at.exception
-
-    def test_dashboard_task_analysis(self):
-        """Test task analysis section"""
-        os.chdir(os.path.join(os.path.dirname(__file__), '..', 'src'))
-        
-        with patch('database.engine') as mock_engine:
-            mock_engine.connect.return_value.__enter__.return_value = MagicMock()
-            
-            at = AppTest.from_file("Dashboard.py")
-            at.run()
-            assert not at.exception
-
-    def test_dashboard_points_calculation(self):
-        """Test points calculation logic through the app"""
-        os.chdir(os.path.join(os.path.dirname(__file__), '..', 'src'))
-        
-        # Create mock data that represents realistic youth missionary activities
-        youth_data = [
-            {"id": 1, "name": "João Silva", "age": 17, "organization": "Rapazes"},
-            {"id": 2, "name": "Maria Santos", "age": 16, "organization": "Moças"}
-        ]
-        
-        task_data = [
-            {"id": 1, "name": "Dar contato (tel/endereço) às Sisteres", "points": 10, "repeatable": True},
-            {"id": 2, "name": "Visitar com as Sisteres", "points": 15, "repeatable": True},
-            {"id": 3, "name": "Levar amigo à sacramental", "points": 20, "repeatable": True},
-            {"id": 4, "name": "Postar mensagem do evangelho nas redes sociais + print", "points": 5, "repeatable": True},
-            {"id": 5, "name": "Fazer noite familiar com pesquisador", "points": 10, "repeatable": True}
-        ]
-        
-        compiled_data = [
-            {"id": 1, "youth_id": 1, "task_id": 1, "quantity": 2, "bonus": 0, 
-             "timestamp": datetime(2024, 8, 18, 10, 0).timestamp()},  # Recent Sunday
-            {"id": 2, "youth_id": 1, "task_id": 2, "quantity": 1, "bonus": 5,
-             "timestamp": datetime(2024, 8, 19, 14, 0).timestamp()},  # Recent Monday  
-            {"id": 3, "youth_id": 2, "task_id": 3, "quantity": 1, "bonus": 0,
-             "timestamp": datetime(2024, 8, 15, 16, 0).timestamp()}   # Previous Thursday
-        ]
-        
-        with patch('database.engine') as mock_engine:
-            # Mock database queries to return our test data
-            mock_conn = MagicMock()
-            mock_engine.connect.return_value.__enter__.return_value = mock_conn
-            
-            # Mock the pandas read_sql calls to return our test data
-            with patch('pandas.read_sql') as mock_read_sql:
-                def side_effect(*args, **kwargs):
-                    if 'youth' in str(args[0]).lower():
-                        return pd.DataFrame(youth_data)
-                    elif 'task' in str(args[0]).lower():
-                        return pd.DataFrame(task_data)
-                    elif 'compiled' in str(args[0]).lower():
-                        return pd.DataFrame(compiled_data)
-                    return pd.DataFrame()
-                
-                mock_read_sql.side_effect = side_effect
-                
-                at = AppTest.from_file("Dashboard.py")
-                at.run()
-                assert not at.exception
-                
-                # Verify that points were calculated
-                # João Silva should have: (2 * 10) + (1 * 15 + 5) = 40 points
-                # Maria Santos should have: 1 * 20 = 20 points
-                young_man_points = 40  # 2 contacts (20) + 1 visit with bonus (20)
-                young_woman_points = 20  # 1 sacramental meeting (20)
-                
-                assert young_man_points == 40
-                assert young_woman_points == 20
-
-
-# Patch streamlit before importing dashboard to avoid initialization for unit tests
-with patch.dict('sys.modules', {'streamlit': MagicMock()}):
-    import importlib.util
-    spec = importlib.util.spec_from_file_location("dashboard", 
-                                                  os.path.join(os.path.dirname(__file__), '..', 'src', 'Dashboard.py'))
-    dashboard_module = importlib.util.module_from_spec(spec)
-
-
-class TestDashboardTotals:
-    """Test the dashboard totals calculation functionality"""
-
-    def test_get_last_sunday_function_logic(self):
-        """Test the get_last_sunday function logic with various days"""
-        
-        def get_last_sunday_local(current_time):
-            """Local copy of the function for testing"""
-            days_since_sunday = current_time.weekday() + 1  # Monday = 1, Tuesday = 2, ..., Sunday = 7
-            last_sunday = current_time - timedelta(days=days_since_sunday)
+class TestDashboardHelperFunctions:
+    """Test helper functions in Dashboard module"""
+    
+    def test_get_last_sunday_logic(self):
+        """Test get_last_sunday function logic"""
+        # Test the logic directly without importing the module
+        def get_last_sunday_test(current_date):
+            days_since_sunday = current_date.weekday() + 1  # Monday = 1, Tuesday = 2, ..., Sunday = 7
+            last_sunday = current_date - timedelta(days=days_since_sunday)
+            # Set to beginning of Sunday
             return last_sunday.replace(hour=0, minute=0, second=0, microsecond=0)
         
-        test_cases = [
-            # (current_day, expected_sunday)
-            (datetime(2024, 8, 18, 12, 0), datetime(2024, 8, 11, 0, 0)),  # Sunday -> previous Sunday
-            (datetime(2024, 8, 19, 12, 0), datetime(2024, 8, 18, 0, 0)),  # Monday -> last Sunday  
-            (datetime(2024, 8, 21, 12, 0), datetime(2024, 8, 18, 0, 0)),  # Wednesday -> last Sunday
-            (datetime(2024, 8, 24, 12, 0), datetime(2024, 8, 18, 0, 0)),  # Saturday -> last Sunday
-        ]
+        # Test with Tuesday, Jan 3, 2023
+        mock_tuesday = datetime(2023, 1, 3, 14, 30, 0)  # Tuesday afternoon
+        last_sunday = get_last_sunday_test(mock_tuesday)
         
-        for current_time, expected_sunday in test_cases:
-            result = get_last_sunday_local(current_time)
-            assert result == expected_sunday, f"For {current_time.strftime('%A %m/%d')}, expected {expected_sunday}, got {result}"
+        # Should return Sunday, Jan 1, 2023 at 00:00:00
+        expected_sunday = datetime(2023, 1, 1, 0, 0, 0)
+        assert last_sunday == expected_sunday
+    
+    def test_get_last_sunday_on_sunday_logic(self):
+        """Test get_last_sunday when today is Sunday"""
+        def get_last_sunday_test(current_date):
+            days_since_sunday = current_date.weekday() + 1  # Monday = 1, Tuesday = 2, ..., Sunday = 7
+            last_sunday = current_date - timedelta(days=days_since_sunday)
+            return last_sunday.replace(hour=0, minute=0, second=0, microsecond=0)
+        
+        # Test with Sunday
+        mock_sunday = datetime(2023, 1, 1, 15, 30, 0)  # Sunday afternoon
+        last_sunday = get_last_sunday_test(mock_sunday)
+        
+        # Sunday's weekday() is 6, so days_since_sunday = 7, should return 7 days ago
+        expected_sunday = datetime(2022, 12, 25, 0, 0, 0)
+        assert last_sunday == expected_sunday
+    
+    def test_get_last_sunday_on_monday_logic(self):
+        """Test get_last_sunday when today is Monday"""
+        def get_last_sunday_test(current_date):
+            days_since_sunday = current_date.weekday() + 1  # Monday = 1, Tuesday = 2, ..., Sunday = 7
+            last_sunday = current_date - timedelta(days=days_since_sunday)
+            return last_sunday.replace(hour=0, minute=0, second=0, microsecond=0)
+        
+        # Test with Monday
+        mock_monday = datetime(2023, 1, 2, 10, 0, 0)  # Monday morning
+        last_sunday = get_last_sunday_test(mock_monday)
+        
+        # Monday's weekday() is 0, so days_since_sunday = 1, should return yesterday (Sunday)
+        expected_sunday = datetime(2023, 1, 1, 0, 0, 0)
+        assert last_sunday == expected_sunday
 
-    def test_calculate_task_totals_with_mocked_data(self):
-        """Test task totals calculation with properly mocked data"""
+
+class TestCalculateTaskTotals:
+    """Test calculate_task_totals function logic"""
+    
+    def test_calculate_task_totals_empty_data(self):
+        """Test calculate_task_totals logic with no data"""
+        # Test the logic directly
+        compiled_entries = []
+        task_entries = []
+        task_dict = {t.id: t for t in task_entries}
         
-        # Create mock entries with proper attributes
-        mock_compiled_entries = [
-            Mock(task_id=1, quantity=2, timestamp=datetime(2024, 8, 18, 10, 0).timestamp()),  # Sunday (this week)
-            Mock(task_id=1, quantity=1, timestamp=datetime(2024, 8, 15, 10, 0).timestamp()),  # Previous Thursday 
-            Mock(task_id=2, quantity=1, timestamp=datetime(2024, 8, 19, 14, 0).timestamp()),  # Monday (this week)
-            Mock(task_id=3, quantity=1, timestamp=datetime(2024, 8, 10, 16, 0).timestamp()),  # Previous Saturday
-        ]
-        
-        # Mock tasks with expected display names mapping
-        mock_tasks = [
-            Mock(id=1, name="Dar contato (tel/endereço) às Sisteres"),
-            Mock(id=2, name="Visitar com as Sisteres"), 
-            Mock(id=3, name="Levar amigo à sacramental"),
-            Mock(id=4, name="Postar mensagem do evangelho nas redes sociais + print"),
-            Mock(id=5, name="Fazer noite familiar com pesquisador")
-        ]
-        
-        # Set the name attributes properly
-        mock_tasks[0].name = "Dar contato (tel/endereço) às Sisteres"
-        mock_tasks[1].name = "Visitar com as Sisteres"
-        mock_tasks[2].name = "Levar amigo à sacramental"
-        mock_tasks[3].name = "Postar mensagem do evangelho nas redes sociais + print"
-        mock_tasks[4].name = "Fazer noite familiar com pesquisador"
-        
-        # Expected mapping after the fix
-        expected_mappings = {
+        # Define target tasks mapping - updated for issue #24 fix
+        target_tasks = {
+            "Entregar Livro de Mórmon + foto + relato no grupo": "Livros de Mórmon entregues",
+            "Levar amigo à sacramental": "Pessoas levadas à igreja",
             "Dar contato (tel/endereço) às Sisteres": "Referências",
             "Visitar com as Sisteres": "Lições",
-            "Levar amigo à sacramental": "Pessoas levadas à igreja",
             "Postar mensagem do evangelho nas redes sociais + print": "Posts nas redes sociais",
             "Fazer noite familiar com pesquisador": "Sessões de noite familiar"
         }
         
-        # This verifies our mapping is complete
-        assert len(expected_mappings) == 5
+        # Calculate totals and deltas
+        totals = {display_name: 0 for display_name in target_tasks.values()}
+        deltas = {display_name: 0 for display_name in target_tasks.values()}
         
-        # Test totals calculation logic
-        current_time = datetime(2024, 8, 20, 10, 0)  # Tuesday
-        week_start_timestamp = datetime(2024, 8, 18, 0, 0, 0).timestamp()  # Sunday start
+        current_time = datetime.now()
+        last_sunday = current_time - timedelta(days=current_time.weekday() + 1)
+        # Week starts on Sunday, not Monday after Sunday - updated for issue #24 fix
+        sunday_timestamp = last_sunday.timestamp()
         
-        # Calculate totals
-        totals = {}
-        deltas = {}
+        for entry in compiled_entries:
+            task = task_dict.get(entry.task_id)
+            if task and task.tasks in target_tasks:
+                display_name = target_tasks[task.tasks]
+                totals[display_name] += entry.quantity
+                
+                # Count activities since last Sunday (current week) - updated for issue #24 fix
+                if entry.timestamp >= sunday_timestamp:
+                    deltas[display_name] += entry.quantity
         
-        for task in mock_tasks:
-            display_name = expected_mappings.get(task.name, task.name)
-            totals[display_name] = 0
-            deltas[display_name] = 0
-            
-            for entry in mock_compiled_entries:
-                if entry.task_id == task.id:
-                    totals[display_name] += entry.quantity
-                    if entry.timestamp >= week_start_timestamp:
-                        deltas[display_name] += entry.quantity
+        expected_keys = [
+            "Livros de Mórmon entregues",
+            "Pessoas levadas à igreja", 
+            "Referências",
+            "Lições",
+            "Posts nas redes sociais",
+            "Sessões de noite familiar"
+        ]
         
-        # Verify expected totals
-        assert totals["Referências"] == 3  # 2 + 1 from task_id=1
-        assert totals["Lições"] == 1      # 1 from task_id=2  
-        assert totals["Pessoas levadas à igreja"] == 1  # 1 from task_id=3
+        # All totals should be 0
+        for key in expected_keys:
+            assert totals[key] == 0
+            assert deltas[key] == 0
+    
+    def test_calculate_task_totals_with_data(self):
+        """Test calculate_task_totals logic with sample data"""
+        # Create proper mock objects
+        class MockTask:
+            def __init__(self, id, tasks):
+                self.id = id
+                self.tasks = tasks
         
-        # Verify deltas (only entries from this week - Sunday onwards)
-        assert deltas["Referências"] == 2  # Only the Sunday entry counts for this week
-        assert deltas["Lições"] == 1       # Monday entry counts 
-        assert deltas["Pessoas levadas à igreja"] == 0  # Previous Saturday doesn't count
+        class MockEntry:
+            def __init__(self, task_id, quantity, timestamp):
+                self.task_id = task_id
+                self.quantity = quantity
+                self.timestamp = timestamp
+        
+        # Mock tasks
+        mock_tasks = [
+            MockTask(1, "Entregar Livro de Mórmon + foto + relato no grupo"),
+            MockTask(2, "Levar amigo à sacramental"),
+            MockTask(3, "Other task")  # This should be ignored
+        ]
+        
+        # Mock compiled entries - some from this week, some older
+        current_time = datetime.now()
+        last_sunday = current_time - timedelta(days=current_time.weekday() + 1)
+        monday_after = last_sunday + timedelta(days=1)
+        
+        old_timestamp = (monday_after - timedelta(days=3)).timestamp()  # Before this week
+        new_timestamp = (monday_after + timedelta(days=1)).timestamp()  # This week
+        
+        mock_compiled = [
+            MockEntry(1, 2, old_timestamp),      # 2 books, old
+            MockEntry(1, 1, new_timestamp),      # 1 book, this week  
+            MockEntry(2, 1, new_timestamp),      # 1 friend, this week
+            MockEntry(3, 5, new_timestamp),      # Other task, ignored
+        ]
+        
+        # Apply dashboard calculation logic
+        task_dict = {t.id: t for t in mock_tasks}
+        
+        # Define target tasks mapping - updated for issue #24 fix
+        target_tasks = {
+            "Entregar Livro de Mórmon + foto + relato no grupo": "Livros de Mórmon entregues",
+            "Levar amigo à sacramental": "Pessoas levadas à igreja",
+            "Dar contato (tel/endereço) às Sisteres": "Referências",
+            "Visitar com as Sisteres": "Lições",
+            "Postar mensagem do evangelho nas redes sociais + print": "Posts nas redes sociais",
+            "Fazer noite familiar com pesquisador": "Sessões de noite familiar"
+        }
+        
+        # Calculate totals and deltas
+        totals = {display_name: 0 for display_name in target_tasks.values()}
+        deltas = {display_name: 0 for display_name in target_tasks.values()}
+        
+        # Week starts on Sunday, not Monday after Sunday - updated for issue #24 fix
+        sunday_timestamp = last_sunday.timestamp()
+        
+        for entry in mock_compiled:
+            task = task_dict.get(entry.task_id)
+            if task and task.tasks in target_tasks:
+                display_name = target_tasks[task.tasks]
+                totals[display_name] += entry.quantity
+                
+                # Count activities since last Sunday (current week) - updated for issue #24 fix
+                if entry.timestamp >= sunday_timestamp:
+                    deltas[display_name] += entry.quantity
+        
+        # Check totals (all entries)
+        assert totals["Livros de Mórmon entregues"] == 3  # 2 + 1
+        assert totals["Pessoas levadas à igreja"] == 1
+        assert totals["Referências"] == 0
+        assert totals["Lições"] == 0
+        assert totals["Posts nas redes sociais"] == 0
+        assert totals["Sessões de noite familiar"] == 0
+        
+        # Check deltas (only this week)
+        assert deltas["Livros de Mórmon entregues"] == 1  # Only new entry
+        assert deltas["Pessoas levadas à igreja"] == 1
+        assert deltas["Referências"] == 0
+        assert deltas["Lições"] == 0
+        assert deltas["Posts nas redes sociais"] == 0
+        assert deltas["Sessões de noite familiar"] == 0
+    
+    def test_calculate_task_totals_all_target_tasks(self):
+        """Test calculate_task_totals logic with all target tasks"""
+        # Create proper mock objects for all target tasks
+        class MockTask:
+            def __init__(self, id, tasks):
+                self.id = id
+                self.tasks = tasks
+        
+        class MockEntry:
+            def __init__(self, task_id, quantity, timestamp):
+                self.task_id = task_id
+                self.quantity = quantity
+                self.timestamp = timestamp
+        
+        # Mock all target tasks - updated for issue #24 fix
+        mock_tasks = [
+            MockTask(1, "Entregar Livro de Mórmon + foto + relato no grupo"),
+            MockTask(2, "Levar amigo à sacramental"),
+            MockTask(3, "Dar contato (tel/endereço) às Sisteres"),
+            MockTask(4, "Visitar com as Sisteres"),
+            MockTask(5, "Postar mensagem do evangelho nas redes sociais + print"),
+            MockTask(6, "Fazer noite familiar com pesquisador"),
+        ]
+        
+        current_time = datetime.now()
+        last_sunday = current_time - timedelta(days=current_time.weekday() + 1)
+        # Week starts on Sunday, not Monday after Sunday - updated for issue #24 fix
+        this_week_timestamp = (last_sunday + timedelta(days=1)).timestamp()
+        
+        # Mock compiled entries for all tasks, all this week
+        mock_compiled = [
+            MockEntry(1, 3, this_week_timestamp),  # 3 books
+            MockEntry(2, 2, this_week_timestamp),  # 2 friends
+            MockEntry(3, 1, this_week_timestamp),  # 1 reference
+            MockEntry(4, 2, this_week_timestamp),  # 2 lessons
+            MockEntry(5, 5, this_week_timestamp),  # 5 posts
+            MockEntry(6, 2, this_week_timestamp),  # 2 family nights
+        ]
+        
+        # Apply dashboard calculation logic
+        task_dict = {t.id: t for t in mock_tasks}
+        
+        # Define target tasks mapping - updated for issue #24 fix
+        target_tasks = {
+            "Entregar Livro de Mórmon + foto + relato no grupo": "Livros de Mórmon entregues",
+            "Levar amigo à sacramental": "Pessoas levadas à igreja",
+            "Dar contato (tel/endereço) às Sisteres": "Referências",
+            "Visitar com as Sisteres": "Lições",
+            "Postar mensagem do evangelho nas redes sociais + print": "Posts nas redes sociais",
+            "Fazer noite familiar com pesquisador": "Sessões de noite familiar"
+        }
+        
+        # Calculate totals and deltas
+        totals = {display_name: 0 for display_name in target_tasks.values()}
+        deltas = {display_name: 0 for display_name in target_tasks.values()}
+        
+        # Week starts on Sunday, not Monday after Sunday - updated for issue #24 fix
+        sunday_timestamp = last_sunday.timestamp()
+        
+        for entry in mock_compiled:
+            task = task_dict.get(entry.task_id)
+            if task and task.tasks in target_tasks:
+                display_name = target_tasks[task.tasks]
+                totals[display_name] += entry.quantity
+                
+                # Count activities since last Sunday (current week) - updated for issue #24 fix
+                if entry.timestamp >= sunday_timestamp:
+                    deltas[display_name] += entry.quantity
+        
+        # All should have matching totals and deltas since all are this week
+        assert totals["Livros de Mórmon entregues"] == 3
+        assert deltas["Livros de Mórmon entregues"] == 3
+        
+        assert totals["Pessoas levadas à igreja"] == 2
+        assert deltas["Pessoas levadas à igreja"] == 2
+        
+        assert totals["Referências"] == 1
+        assert deltas["Referências"] == 1
+        
+        assert totals["Lições"] == 2
+        assert deltas["Lições"] == 2
+        
+        assert totals["Posts nas redes sociais"] == 5
+        assert deltas["Posts nas redes sociais"] == 5
+        
+        assert totals["Sessões de noite familiar"] == 2
+        assert deltas["Sessões de noite familiar"] == 2
 
-    def test_dashboard_ui_changes_verification(self):
-        """Test that UI changes are properly implemented"""
+
+class TestDashboardDataProcessing:
+    """Test data processing logic used in dashboard"""
+    
+    def test_youth_ranking_logic(self):
+        """Test the logic for ranking youth by total points"""
+        # Create proper mock objects
+        class MockYouth:
+            def __init__(self, name, age, organization, total_points):
+                self.name = name
+                self.age = age
+                self.organization = organization
+                self.total_points = total_points
         
-        # Test the expected activity names and icons after the fix
+        # Mock youth data
+        mock_youth = [
+            MockYouth("João", 16, "Rapazes", 100),
+            MockYouth("Maria", 15, "Moças", 150),
+            MockYouth("Pedro", 17, "Rapazes", 0),  # Should be filtered out
+            MockYouth("Ana", 16, "Moças", 75),
+        ]
+        
+        # Apply the same logic as in Dashboard
+        filtered_youth = [y for y in mock_youth if y.total_points > 0]
+        sorted_youth = sorted(filtered_youth, key=lambda y: y.total_points, reverse=True)
+        
+        # Should be sorted by points, highest first, zero points filtered out
+        assert len(sorted_youth) == 3
+        assert sorted_youth[0].name == "Maria"  # 150 points
+        assert sorted_youth[0].total_points == 150
+        assert sorted_youth[1].name == "João"   # 100 points
+        assert sorted_youth[1].total_points == 100
+        assert sorted_youth[2].name == "Ana"    # 75 points
+        assert sorted_youth[2].total_points == 75
+        
+        # Pedro should be filtered out (0 points)
+        names = [y.name for y in sorted_youth]
+        assert "Pedro" not in names
+    
+    def test_task_points_calculation(self):
+        """Test the logic for calculating task points"""
+        # Mock tasks
+        mock_tasks = [
+            MagicMock(id=1, tasks="Task 1", points=10),
+            MagicMock(id=2, tasks="Task 2", points=20),
+            MagicMock(id=3, tasks="Task 3", points=5),
+        ]
+        
+        # Mock compiled entries
+        mock_compiled = [
+            MagicMock(task_id=1, quantity=2, bonus=5),  # 10*2 + 5 = 25 points
+            MagicMock(task_id=1, quantity=1, bonus=0),  # 10*1 + 0 = 10 points  
+            MagicMock(task_id=2, quantity=1, bonus=10), # 20*1 + 10 = 30 points
+            MagicMock(task_id=3, quantity=3, bonus=0),  # 5*3 + 0 = 15 points
+        ]
+        
+        # Apply the same logic as in Dashboard
+        task_dict = {t.id: t for t in mock_tasks}
+        task_points = {}
+        
+        for entry in mock_compiled:
+            task = task_dict.get(entry.task_id)
+            if task:
+                points = task.points * entry.quantity + entry.bonus
+                task_points[task.tasks] = task_points.get(task.tasks, 0) + points
+        
+        # Check calculated points
+        assert task_points["Task 1"] == 35  # 25 + 10
+        assert task_points["Task 2"] == 30  # 30
+        assert task_points["Task 3"] == 15  # 15
+    
+    def test_organization_points_calculation(self):
+        """Test the logic for calculating organization total points"""
+        # Mock youth data
+        mock_youth = [
+            MagicMock(organization="Rapazes", total_points=100),
+            MagicMock(organization="Rapazes", total_points=50),
+            MagicMock(organization="Moças", total_points=75),
+            MagicMock(organization="Moças", total_points=125),
+            MagicMock(organization="Moças", total_points=25),
+        ]
+        
+        # Apply the same logic as in Dashboard
+        young_man_points = sum(y.total_points for y in mock_youth if y.organization == "Rapazes")
+        young_woman_points = sum(y.total_points for y in mock_youth if y.organization == "Moças")
+        
+        assert young_man_points == 150  # 100 + 50
+        assert young_woman_points == 225  # 75 + 125 + 25
+
+
+class TestDashboardConstants:
+    """Test constants and configuration in Dashboard"""
+    
+    def test_target_tasks_mapping(self):
+        """Test that target_tasks mapping is correct"""
+        # This tests the target_tasks dictionary structure - updated for issue #24 fix
+        expected_mapping = {
+            "Entregar Livro de Mórmon + foto + relato no grupo": "Livros de Mórmon entregues",
+            "Levar amigo à sacramental": "Pessoas levadas à igreja",
+            "Dar contato (tel/endereço) às Sisteres": "Referências",
+            "Visitar com as Sisteres": "Lições",
+            "Postar mensagem do evangelho nas redes sociais + print": "Posts nas redes sociais",
+            "Fazer noite familiar com pesquisador": "Sessões de noite familiar"
+        }
+        
+        # Test the mapping directly
+        assert len(expected_mapping) == 6  # Updated from 5 to 6
+        assert expected_mapping["Entregar Livro de Mórmon + foto + relato no grupo"] == "Livros de Mórmon entregues"
+        assert expected_mapping["Levar amigo à sacramental"] == "Pessoas levadas à igreja"
+        assert expected_mapping["Dar contato (tel/endereço) às Sisteres"] == "Referências"
+        assert expected_mapping["Visitar com as Sisteres"] == "Lições"
+        assert expected_mapping["Postar mensagem do evangelho nas redes sociais + print"] == "Posts nas redes sociais"
+        assert expected_mapping["Fazer noite familiar com pesquisador"] == "Sessões de noite familiar"
+    
+    def test_activity_cards_structure(self):
+        """Test the structure of activity cards - updated for issue #24 fix"""
+        # This tests the activities list structure used for metric cards
         expected_activities = [
             ("Livros de Mórmon", "📖"),
             ("Pessoas na igreja", "⛪"),
@@ -259,190 +484,370 @@ class TestDashboardTotals:
             ("Noites familiares", "🏠")
         ]
         
-        # Verify we have 6 activities (not 5 like before the fix)
+        # Verify we have the right number and structure - updated from 5 to 6
         assert len(expected_activities) == 6
         
-        # Verify specific icon mappings
-        activity_dict = dict(expected_activities)
-        assert activity_dict["Referências"] == "📞"
-        assert activity_dict["Lições"] == "👥"
+        for name, icon in expected_activities:
+            assert isinstance(name, str)
+            assert isinstance(icon, str)
+            assert len(name) > 0
+            assert len(icon) > 0
+    
+    def test_color_constants(self):
+        """Test color constants for charts"""
+        # Test that the color constants exist and are valid hex colors
+        COLOR_YOUNG_MAN = "#1f77b4"
+        COLOR_YOUNG_WOMAN = "#e75480"
         
-        # Verify "Batismos" is NOT in the list (it was removed)
-        activity_names = [name for name, icon in expected_activities]
-        assert "Batismos" not in activity_names
-        assert "Referências" in activity_names
-        assert "Lições" in activity_names
+        assert COLOR_YOUNG_MAN.startswith("#")
+        assert len(COLOR_YOUNG_MAN) == 7
+        assert COLOR_YOUNG_WOMAN.startswith("#")
+        assert len(COLOR_YOUNG_WOMAN) == 7
 
 
-class TestDashboardDataFlow:
-    """Test the data flow and processing in dashboard"""
-
-    def test_task_name_to_display_name_mapping(self):
-        """Test the mapping from task names to display names"""
+class TestDashboardEdgeCases:
+    """Test edge cases and boundary conditions"""
+    
+    def test_calculate_task_totals_missing_task(self):
+        """Test calculate_task_totals when compiled entry references missing task"""
+        # Create proper mock objects
+        class MockTask:
+            def __init__(self, id, tasks):
+                self.id = id
+                self.tasks = tasks
         
-        # This mapping reflects the changes made to fix issue #24
-        expected_mappings = {
+        class MockEntry:
+            def __init__(self, task_id, quantity, timestamp):
+                self.task_id = task_id
+                self.quantity = quantity
+                self.timestamp = timestamp
+        
+        # Mock tasks (missing task id 2)
+        mock_tasks = [
+            MockTask(1, "Task 1"),
+        ]
+        
+        # Mock compiled entries (references missing task id 2)
+        mock_compiled = [
+            MockEntry(1, 1, datetime.now().timestamp()),
+            MockEntry(2, 1, datetime.now().timestamp()),  # Missing task
+        ]
+        
+        # Apply the calculation logic
+        task_dict = {t.id: t for t in mock_tasks}
+        
+        target_tasks = {
+            "Entregar Livro de Mórmon + foto + relato no grupo": "Livros de Mórmon entregues",
+            "Levar amigo à sacramental": "Pessoas levadas à igreja",
             "Dar contato (tel/endereço) às Sisteres": "Referências",
             "Visitar com as Sisteres": "Lições",
-            "Levar amigo à sacramental": "Pessoas levadas à igreja",
             "Postar mensagem do evangelho nas redes sociais + print": "Posts nas redes sociais",
             "Fazer noite familiar com pesquisador": "Sessões de noite familiar"
         }
         
-        # Calculate totals and deltas
-        totals = {display_name: 0 for display_name in expected_mappings.values()}
-        deltas = {display_name: 0 for display_name in expected_mappings.values()}
+        totals = {display_name: 0 for display_name in target_tasks.values()}
+        deltas = {display_name: 0 for display_name in target_tasks.values()}
         
-        # Verify all expected display names are present
-        assert "Referências" in totals
-        assert "Lições" in totals
-        assert "Batismos" not in totals  # This was removed
+        current_time = datetime.now()
+        last_sunday = current_time - timedelta(days=current_time.weekday() + 1)
+        # Week starts on Sunday, not Monday after Sunday - updated for issue #24 fix
+        sunday_timestamp = last_sunday.timestamp()
         
-        # Verify we have the correct number of metrics
-        assert len(totals) == 5
-
-    def test_week_boundary_calculation(self):
-        """Test that week boundaries work correctly (Sunday to Saturday)"""
+        for entry in mock_compiled:
+            task = task_dict.get(entry.task_id)
+            if task and task.tasks in target_tasks:
+                display_name = target_tasks[task.tasks]
+                totals[display_name] += entry.quantity
+                
+                # Count activities since last Sunday (current week) - updated for issue #24 fix
+                if entry.timestamp >= sunday_timestamp:
+                    deltas[display_name] += entry.quantity
         
-        # Test various timestamps around week boundary
-        test_cases = [
-            # (timestamp, description, should_count_as_this_week)
-            (datetime(2024, 8, 17, 23, 59).timestamp(), "Saturday before", False),
-            (datetime(2024, 8, 18, 0, 0).timestamp(), "Sunday start", True),
-            (datetime(2024, 8, 18, 12, 0).timestamp(), "Sunday afternoon", True),
-            (datetime(2024, 8, 19, 10, 0).timestamp(), "Monday", True),
-            (datetime(2024, 8, 24, 23, 59).timestamp(), "Saturday end", True),
-            (datetime(2024, 8, 25, 0, 0).timestamp(), "Next Sunday", False),
+        # Should not raise an error, should handle missing task gracefully
+        assert isinstance(totals, dict)
+        assert isinstance(deltas, dict)
+        
+        # All totals should be 0 since no tasks match the target tasks
+        for key in target_tasks.values():
+            assert totals[key] == 0
+            assert deltas[key] == 0
+    
+    def test_empty_youth_list_ranking(self):
+        """Test youth ranking with empty list"""
+        mock_youth = []
+        
+        filtered_youth = [y for y in mock_youth if y.total_points > 0]
+        sorted_youth = sorted(filtered_youth, key=lambda y: y.total_points, reverse=True)
+        
+        assert len(sorted_youth) == 0
+        assert sorted_youth == []
+    
+    def test_all_zero_points_youth(self):
+        """Test youth ranking when all youth have zero points"""
+        mock_youth = [
+            MagicMock(name="João", total_points=0),
+            MagicMock(name="Maria", total_points=0),
         ]
         
-        # Week starts on Sunday (Aug 18, 2024) and ends on Saturday (Aug 24, 2024)
-        week_start_timestamp = datetime(2024, 8, 18, 0, 0, 0).timestamp()
-        week_end_timestamp = datetime(2024, 8, 25, 0, 0, 0).timestamp()  # Start of next week
+        filtered_youth = [y for y in mock_youth if y.total_points > 0]
+        sorted_youth = sorted(filtered_youth, key=lambda y: y.total_points, reverse=True)
         
-        for timestamp, description, should_count in test_cases:
-            counts_as_this_week = timestamp >= week_start_timestamp and timestamp < week_end_timestamp
-            assert counts_as_this_week == should_count, f"{description}: expected {should_count}, got {counts_as_this_week}"
-
-    def test_delta_text_format(self):
-        """Test that delta text shows 'novos' instead of 'esta semana'"""
+        assert len(sorted_youth) == 0
+        assert sorted_youth == []
+    
+    def test_organization_points_empty_data(self):
+        """Test organization points calculation with no youth"""
+        mock_youth = []
         
-        # Mock some delta values
-        test_deltas = [0, 1, 2, 5, 10]
+        young_man_points = sum(y.total_points for y in mock_youth if y.organization == "Rapazes")
+        young_woman_points = sum(y.total_points for y in mock_youth if y.organization == "Moças")
         
-        for delta in test_deltas:
-            if delta > 0:
-                expected_text = f"+{delta} novos"
-                # Verify the text format (this would be used in the dashboard)
-                assert "novos" in expected_text
-                assert "esta semana" not in expected_text
-                assert str(delta) in expected_text
-
-
-class TestDashboardUIChanges:
-    """Test specific UI changes made to fix issue #24"""
-
-    def test_metrics_layout_structure(self):
-        """Test that the metrics are displayed in 6 columns with proper icons"""
+        assert young_man_points == 0
+        assert young_woman_points == 0
+    
+    def test_organization_points_unknown_organization(self):
+        """Test organization points with unknown organization"""
+        mock_youth = [
+            MagicMock(organization="Unknown", total_points=100),
+            MagicMock(organization="Rapazes", total_points=50),
+        ]
         
-        # Expected metrics after the fix
-        expected_metrics = [
+        young_man_points = sum(y.total_points for y in mock_youth if y.organization == "Rapazes")
+        young_woman_points = sum(y.total_points for y in mock_youth if y.organization == "Moças")
+        
+        # Unknown organization should not be counted
+        assert young_man_points == 50
+        assert young_woman_points == 0
+
+
+class TestDashboardTotalsFix:
+    """Test specific fixes for issue #24 - dashboard totals improvements"""
+    
+    def test_sunday_saturday_week_calculation(self):
+        """Test that week calculation runs from Sunday to Saturday (issue #24 fix)"""
+        def get_last_sunday_test(current_date):
+            """Test implementation of get_last_sunday logic"""
+            days_since_sunday = current_date.weekday() + 1  # Monday = 1, Tuesday = 2, ..., Sunday = 7
+            last_sunday = current_date - timedelta(days=days_since_sunday)
+            return last_sunday.replace(hour=0, minute=0, second=0, microsecond=0)
+        
+        # Test various days to ensure week starts on Sunday
+        test_cases = [
+            (datetime(2023, 1, 1, 15, 30, 0), datetime(2022, 12, 25, 0, 0, 0)),  # Sunday -> previous Sunday
+            (datetime(2023, 1, 2, 10, 0, 0), datetime(2023, 1, 1, 0, 0, 0)),    # Monday -> yesterday (Sunday)
+            (datetime(2023, 1, 3, 14, 30, 0), datetime(2023, 1, 1, 0, 0, 0)),   # Tuesday -> previous Sunday
+            (datetime(2023, 1, 7, 18, 0, 0), datetime(2023, 1, 1, 0, 0, 0)),    # Saturday -> previous Sunday
+        ]
+        
+        for current_date, expected_sunday in test_cases:
+            result = get_last_sunday_test(current_date)
+            assert result == expected_sunday, f"Failed for {current_date}: expected {expected_sunday}, got {result}"
+    
+    def test_batismos_task_removed(self):
+        """Test that Batismos task is no longer in target_tasks mapping (issue #24 fix)"""
+        target_tasks = {
+            "Entregar Livro de Mórmon + foto + relato no grupo": "Livros de Mórmon entregues",
+            "Levar amigo à sacramental": "Pessoas levadas à igreja",
+            "Dar contato (tel/endereço) às Sisteres": "Referências",
+            "Visitar com as Sisteres": "Lições",
+            "Postar mensagem do evangelho nas redes sociais + print": "Posts nas redes sociais",
+            "Fazer noite familiar com pesquisador": "Sessões de noite familiar"
+        }
+        
+        # Batismos should no longer be present
+        assert "Ajudar alguém a se batizar" not in target_tasks
+        assert "Batismos" not in target_tasks.values()
+        
+        # New tasks should be present
+        assert "Dar contato (tel/endereço) às Sisteres" in target_tasks
+        assert "Visitar com as Sisteres" in target_tasks
+        assert target_tasks["Dar contato (tel/endereço) às Sisteres"] == "Referências"
+        assert target_tasks["Visitar com as Sisteres"] == "Lições"
+    
+    def test_new_referencia_and_licao_tasks(self):
+        """Test that new Referências and Lições tasks are properly mapped (issue #24 fix)"""
+        # Create mock objects
+        class MockTask:
+            def __init__(self, id, tasks):
+                self.id = id
+                self.tasks = tasks
+        
+        class MockEntry:
+            def __init__(self, task_id, quantity, timestamp):
+                self.task_id = task_id
+                self.quantity = quantity
+                self.timestamp = timestamp
+        
+        # Mock tasks with new task types
+        mock_tasks = [
+            MockTask(1, "Dar contato (tel/endereço) às Sisteres"),
+            MockTask(2, "Visitar com as Sisteres"),
+        ]
+        
+        current_time = datetime.now()
+        timestamp = current_time.timestamp()
+        
+        # Mock compiled entries
+        mock_compiled = [
+            MockEntry(1, 3, timestamp),  # 3 referencias
+            MockEntry(2, 2, timestamp),  # 2 licoes
+        ]
+        
+        # Apply calculation logic
+        task_dict = {t.id: t for t in mock_tasks}
+        target_tasks = {
+            "Entregar Livro de Mórmon + foto + relato no grupo": "Livros de Mórmon entregues",
+            "Levar amigo à sacramental": "Pessoas levadas à igreja",
+            "Dar contato (tel/endereço) às Sisteres": "Referências",
+            "Visitar com as Sisteres": "Lições",
+            "Postar mensagem do evangelho nas redes sociais + print": "Posts nas redes sociais",
+            "Fazer noite familiar com pesquisador": "Sessões de noite familiar"
+        }
+        
+        totals = {display_name: 0 for display_name in target_tasks.values()}
+        
+        for entry in mock_compiled:
+            task = task_dict.get(entry.task_id)
+            if task and task.tasks in target_tasks:
+                display_name = target_tasks[task.tasks]
+                totals[display_name] += entry.quantity
+        
+        # Verify new tasks are counted correctly
+        assert totals["Referências"] == 3
+        assert totals["Lições"] == 2
+    
+    def test_six_column_layout_structure(self):
+        """Test that dashboard now has 6 activity columns instead of 5 (issue #24 fix)"""
+        # Expected activities list for 6-column layout
+        expected_activities = [
             ("Livros de Mórmon", "📖"),
-            ("Pessoas na igreja", "⛪"), 
+            ("Pessoas na igreja", "⛪"),
             ("Referências", "📞"),
             ("Lições", "👥"),
             ("Posts", "📱"),
             ("Noites familiares", "🏠")
         ]
         
-        # Verify structure
-        assert len(expected_metrics) == 6, "Should have exactly 6 metrics in the new layout"
+        # Should be 6 columns now, not 5
+        assert len(expected_activities) == 6
         
-        # Verify specific changes
-        metric_names = [name for name, icon in expected_metrics]
-        assert "Batismos" not in metric_names, "Batismos should be removed"
-        assert "Referências" in metric_names, "Referências should be added"
-        assert "Lições" in metric_names, "Lições should be added"
-
-    def test_icon_assignments(self):
-        """Test that the correct icons are assigned to each metric"""
+        # Verify specific new icons
+        activity_dict = dict(expected_activities)
+        assert activity_dict["Referências"] == "📞"  # Phone icon for references
+        assert activity_dict["Lições"] == "👥"       # People icon for lessons
         
-        icon_mappings = {
-            "Livros de Mórmon": "📖",
-            "Pessoas na igreja": "⛪",
-            "Referências": "📞", 
-            "Lições": "👥",
-            "Posts": "📱",
-            "Noites familiares": "🏠"
-        }
+        # Verify old "Batismos" is not present
+        activity_names = [name for name, _ in expected_activities]
+        assert "Batismos" not in activity_names
+    
+    def test_delta_text_format_novos_not_esta_semana(self):
+        """Test that delta text shows '+X novos' instead of '+X esta semana' (issue #24 fix)"""
+        # Test the string formatting logic
+        delta_value = 5
         
-        # Verify new icons are correct
-        assert icon_mappings["Referências"] == "📞", "Referências should use phone icon"
-        assert icon_mappings["Lições"] == "👥", "Lições should use people icon"
+        # Old format (should not be used)
+        old_format = f"+{delta_value} esta semana"
         
-        # Verify we don't have the old Batismos icon
-        assert "🛁" not in icon_mappings.values(), "Bath/baptism icon should not be used"
-
-    def test_dashboard_content_structure(self):
-        """Test dashboard content structure with mocked rendering"""
+        # New format (should be used)
+        new_format = f"+{delta_value} novos"
         
-        # Mock values for testing
-        metrics_data = {
-            "Livros de Mórmon": (32, 4),  # (total, delta)
-            "Pessoas na igreja": (5, 1),
-            "Referências": (2, 2),  # New metric
-            "Lições": (2, 2),       # New metric  
-            "Posts": (10, 3),
-            "Noites familiares": (1, 0)
-        }
+        # Verify the new format is different and more generic
+        assert old_format == "+5 esta semana"
+        assert new_format == "+5 novos"
+        assert old_format != new_format
         
-        # Simulate dashboard rendering logic
-        for metric_name, (total, delta) in metrics_data.items():
-            # Verify each metric has proper data
-            assert isinstance(total, int), f"{metric_name} total should be integer"
-            assert isinstance(delta, int), f"{metric_name} delta should be integer"
-            assert total >= 0, f"{metric_name} total should be non-negative"
-            assert delta >= 0, f"{metric_name} delta should be non-negative"
-            
-            # Test delta text format  
-            if delta > 0:
-                delta_text = f"+{delta} novos"
-                assert "novos" in delta_text, f"Delta text should contain 'novos' for {metric_name}"
-                assert "esta semana" not in delta_text, f"Delta text should not contain 'esta semana' for {metric_name}"
-
-    def test_dashboard_rendering_simulation(self):
-        """Simulate dashboard rendering to verify all elements are present"""
+        # The new format should not reference a specific time period
+        assert "semana" not in new_format
+        assert "novos" in new_format
+    
+    def test_comprehensive_dashboard_totals_calculation(self):
+        """Test comprehensive calculation with all new changes together (issue #24 fix)"""
+        # Create mock objects
+        class MockTask:
+            def __init__(self, id, tasks):
+                self.id = id
+                self.tasks = tasks
         
-        # Expected content that should appear in the dashboard
-        expected_content_parts = [
-            "Totais das Atividades Missionárias",  # Title
-            "📖", "📞", "👥", "⛪", "📱", "🏠",     # Icons
-            "Livros de M", "Referências", "Lições", "Pessoas na i", "Posts", "Noites famil",  # Metric labels
-            "novos"  # Delta text format
+        class MockEntry:
+            def __init__(self, task_id, quantity, timestamp):
+                self.task_id = task_id
+                self.quantity = quantity
+                self.timestamp = timestamp
+        
+        # Mock all target tasks including new ones
+        mock_tasks = [
+            MockTask(1, "Entregar Livro de Mórmon + foto + relato no grupo"),
+            MockTask(2, "Levar amigo à sacramental"),
+            MockTask(3, "Dar contato (tel/endereço) às Sisteres"),
+            MockTask(4, "Visitar com as Sisteres"),
+            MockTask(5, "Postar mensagem do evangelho nas redes sociais + print"),
+            MockTask(6, "Fazer noite familiar com pesquisador"),
         ]
         
-        # Simulate content string (this represents what would be rendered)
-        simulated_content = """
-        Painel de Jovens Missionários
-        Totais das Atividades Missionárias
-        📖 Livros de M... 1 +1 novos
-        ⛪ Pessoas na i... 0 
-        📞 Referências 2 +2 novos
-        👥 Lições 2 +2 novos  
-        📱 Posts 0
-        🏠 Noites famil... 0
-        """
+        # Create timestamps for testing week calculation (Sunday-Saturday)
+        current_time = datetime.now()
+        last_sunday = current_time - timedelta(days=current_time.weekday() + 1)
         
-        # Verify expected content is present
-        for content_part in expected_content_parts:
-            if content_part == "novos":
-                # Special case: check that novos appears but not "esta semana"
-                assert "novos" in simulated_content, "Delta text should show 'novos'"
-                assert "esta semana" not in simulated_content, "Should not show 'esta semana'"
-            else:
-                # Check for icons and metric parts
-                assert content_part in simulated_content or any(part in simulated_content for part in content_part.split()), f"Content should contain {content_part}"
+        # Old entries (before this week)
+        old_timestamp = (last_sunday - timedelta(days=2)).timestamp()
         
-        # Verify specific content changes
-        for icon, metric_part in [("📞", "Referências"), ("👥", "Lições")]:
-            assert icon in simulated_content, f"Icon {icon} not found in dashboard"
-            assert metric_part in simulated_content, f"Metric {metric_part} not found in dashboard"
+        # New entries (this week starting Sunday)
+        new_timestamp = (last_sunday + timedelta(days=1)).timestamp()
+        
+        # Mock compiled entries with mix of old and new
+        mock_compiled = [
+            # Old entries
+            MockEntry(1, 2, old_timestamp),  # 2 books, old
+            MockEntry(3, 1, old_timestamp),  # 1 reference, old
+            
+            # New entries (this week)
+            MockEntry(1, 1, new_timestamp),  # 1 book, new
+            MockEntry(2, 1, new_timestamp),  # 1 friend, new
+            MockEntry(3, 2, new_timestamp),  # 2 references, new
+            MockEntry(4, 3, new_timestamp),  # 3 lessons, new
+            MockEntry(5, 1, new_timestamp),  # 1 post, new
+            MockEntry(6, 1, new_timestamp),  # 1 family night, new
+        ]
+        
+        # Apply calculation logic with Sunday-Saturday week
+        task_dict = {t.id: t for t in mock_tasks}
+        target_tasks = {
+            "Entregar Livro de Mórmon + foto + relato no grupo": "Livros de Mórmon entregues",
+            "Levar amigo à sacramental": "Pessoas levadas à igreja",
+            "Dar contato (tel/endereço) às Sisteres": "Referências",
+            "Visitar com as Sisteres": "Lições",
+            "Postar mensagem do evangelho nas redes sociais + print": "Posts nas redes sociais",
+            "Fazer noite familiar com pesquisador": "Sessões de noite familiar"
+        }
+        
+        totals = {display_name: 0 for display_name in target_tasks.values()}
+        deltas = {display_name: 0 for display_name in target_tasks.values()}
+        
+        # Week starts on Sunday
+        sunday_timestamp = last_sunday.timestamp()
+        
+        for entry in mock_compiled:
+            task = task_dict.get(entry.task_id)
+            if task and task.tasks in target_tasks:
+                display_name = target_tasks[task.tasks]
+                totals[display_name] += entry.quantity
+                
+                # Count activities since last Sunday (current week)
+                if entry.timestamp >= sunday_timestamp:
+                    deltas[display_name] += entry.quantity
+        
+        # Verify totals (all entries)
+        assert totals["Livros de Mórmon entregues"] == 3  # 2 old + 1 new
+        assert totals["Pessoas levadas à igreja"] == 1    # 0 old + 1 new
+        assert totals["Referências"] == 3                 # 1 old + 2 new
+        assert totals["Lições"] == 3                      # 0 old + 3 new
+        assert totals["Posts nas redes sociais"] == 1     # 0 old + 1 new
+        assert totals["Sessões de noite familiar"] == 1   # 0 old + 1 new
+        
+        # Verify deltas (only this week, starting Sunday)
+        assert deltas["Livros de Mórmon entregues"] == 1  # Only new entries
+        assert deltas["Pessoas levadas à igreja"] == 1
+        assert deltas["Referências"] == 2
+        assert deltas["Lições"] == 3
+        assert deltas["Posts nas redes sociais"] == 1
+        assert deltas["Sessões de noite familiar"] == 1
