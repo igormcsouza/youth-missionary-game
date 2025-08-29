@@ -9,6 +9,7 @@ from freezegun import freeze_time
 
 # Import the modules to test
 sys.path.insert(0, os.path.join(os.path.dirname(__file__), '..', 'src'))
+import Dashboard
 
 
 class TestDashboardVisualElements:
@@ -63,9 +64,6 @@ class TestDashboardTimeBasedCalculations:
     
     def test_get_last_sunday_function_logic(self):
         """Test the get_last_sunday function logic without Streamlit"""
-        # Import the function directly for testing
-        sys.path.insert(0, os.path.join(os.path.dirname(__file__), '..', 'src'))
-        import Dashboard
         
         # Test with different days to ensure Sunday-Saturday week calculation
         with freeze_time("2023-01-01 15:30:00"):  # Sunday afternoon
@@ -92,9 +90,6 @@ class TestDashboardTargetTasks:
     
     def test_target_tasks_mapping_structure(self):
         """Test that target_tasks mapping has correct structure without Batismos"""
-        # Import Dashboard module to check the target_tasks mapping
-        sys.path.insert(0, os.path.join(os.path.dirname(__file__), '..', 'src'))
-        import Dashboard
         
         # Mock data to trigger calculate_task_totals
         with patch('Dashboard.CompiledFormDataRepository.get_all') as mock_compiled, \
@@ -130,8 +125,6 @@ class TestDashboardTargetTasks:
     
     def test_new_referencias_and_licoes_tasks_in_mapping(self):
         """Test that new Referências and Lições tasks are in the mapping"""
-        sys.path.insert(0, os.path.join(os.path.dirname(__file__), '..', 'src'))
-        import Dashboard
         
         # Check that the calculate_task_totals function includes the new tasks
         with patch('Dashboard.CompiledFormDataRepository.get_all') as mock_compiled, \
@@ -191,8 +184,6 @@ class TestDashboardDataProcessing:
     
     def test_calculate_task_totals_with_realistic_data(self):
         """Test calculate_task_totals function with realistic missionary data"""
-        sys.path.insert(0, os.path.join(os.path.dirname(__file__), '..', 'src'))
-        import Dashboard
         
         # Mock realistic missionary activity data
         with patch('Dashboard.CompiledFormDataRepository.get_all') as mock_compiled, \
@@ -315,8 +306,6 @@ class TestDashboardWeekCalculationEdgeCases:
     
     def test_week_boundaries_with_freezegun(self):
         """Test week boundary calculations with different days"""
-        sys.path.insert(0, os.path.join(os.path.dirname(__file__), '..', 'src'))
-        import Dashboard
         
         # Test Saturday night to Sunday morning transition
         with freeze_time("2023-01-07 23:59:59"):  # Saturday 23:59:59
@@ -336,8 +325,6 @@ class TestDashboardWeekCalculationEdgeCases:
     
     def test_midweek_calculation(self):
         """Test week calculation for middle of the week"""
-        sys.path.insert(0, os.path.join(os.path.dirname(__file__), '..', 'src'))
-        import Dashboard
         
         # Test Wednesday 
         with freeze_time("2023-01-04 14:30:00"):  # Wednesday afternoon
