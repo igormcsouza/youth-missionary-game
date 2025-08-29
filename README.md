@@ -124,8 +124,6 @@ This project includes comprehensive testing with pytest and coverage reporting. 
 - **Target coverage**: 85%+
 - **Test categories**: Unit tests, integration tests, Streamlit UI tests
 
-See [TESTING.md](TESTING.md) for detailed testing documentation.
-
 ## License
 
 This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
