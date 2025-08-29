@@ -121,7 +121,7 @@ flyctl secrets set POSTGRESCONNECTIONSTRING="your-postgres-connection-string"
 This project includes comprehensive testing with pytest and coverage reporting. Tests are automatically run on every push and pull request.
 
 - **Run tests locally**: `pytest tests/ --cov=src --cov-report=term-missing -v`
-- **Current coverage**: 87% (target: 85%+)
+- **Target coverage**: 85%+
 - **Test categories**: Unit tests, integration tests, Streamlit UI tests
 
 See [TESTING.md](TESTING.md) for detailed testing documentation.
