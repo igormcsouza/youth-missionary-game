@@ -1,6 +1,8 @@
 # Youth Missionary Game
 
 [![Deploy to Fly.io](https://github.com/igormcsouza/youth-missionary-game/actions/workflows/deploy.yml/badge.svg)](https://github.com/igormcsouza/youth-missionary-game/actions/workflows/deploy.yml)
+[![Test Suite](https://github.com/igormcsouza/youth-missionary-game/actions/workflows/test.yml/badge.svg)](https://github.com/igormcsouza/youth-missionary-game/actions/workflows/test.yml)
+[![codecov](https://codecov.io/gh/igormcsouza/youth-missionary-game/branch/main/graph/badge.svg)](https://codecov.io/gh/igormcsouza/youth-missionary-game)
 
 A Streamlit-based web application for managing youth missionary competitions. This app allows you to register youth participants, create tasks with scoring systems, track task completions, and view interactive dashboards with rankings and statistics.
 
@@ -113,6 +115,14 @@ flyctl secrets set POSTGRESCONNECTIONSTRING="your-postgres-connection-string"
 4. Commit your changes: `git commit -am 'Add some feature'`
 5. Push to the branch: `git push origin feature-name`
 6. Submit a pull request
+
+### Testing
+
+This project includes comprehensive testing with pytest and coverage reporting. Tests are automatically run on every push and pull request.
+
+- **Run tests locally**: `pytest tests/ --cov=src --cov-report=term-missing -v`
+- **Target coverage**: 85%+
+- **Test categories**: Unit tests, integration tests, Streamlit UI tests
 
 ## License
 

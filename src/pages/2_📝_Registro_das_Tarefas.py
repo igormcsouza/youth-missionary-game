@@ -22,10 +22,11 @@ def refresh_youth_and_task_entries():
 	youth_entries = YouthFormDataRepository.get_all()
 	task_entries = TasksFormDataRepository.get_all()
 	youth_options = {y.id: y.name for y in youth_entries}
+	youth_org_options = {y.id: y.organization for y in youth_entries}
 	task_options = {t.id: t.tasks for t in task_entries}
-	return youth_entries, task_entries, youth_options, task_options
+	return youth_entries, task_entries, youth_options, youth_org_options, task_options
 
-youth_entries, task_entries, youth_options, task_options = refresh_youth_and_task_entries()
+youth_entries, task_entries, youth_options, youth_org_options, task_options = refresh_youth_and_task_entries()
 task_by_id = {t.id: t for t in task_entries}
 
 with st.form("compiled_form"):
@@ -82,12 +83,15 @@ compiled_entries = CompiledFormDataRepository.get_all()
 if compiled_entries:
 	def get_name_by_id(id_):
 		return youth_options.get(id_, str(id_))
+	def get_organization_by_id(id_):
+		return youth_org_options.get(id_, str(id_))
 	def get_task_by_id(id_):
 		return task_options.get(id_, str(id_))
 
 	df_compiled = pd.DataFrame([
 		{
 			"Jovem": get_name_by_id(e.youth_id),
+			"Organização": get_organization_by_id(e.youth_id),
 			"Tarefa": get_task_by_id(e.task_id),
 			"Data": datetime.fromtimestamp(e.timestamp).strftime("%d/%m/%Y"),
 			"Quantidade": e.quantity,
