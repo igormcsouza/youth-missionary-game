@@ -25,11 +25,17 @@ Always reference these instructions first and fallback to search or bash command
 - Run containerized app: `docker run -p 8080:8080 -e AUTH=your_password youth-missionary-game`
 
 ### Validation and Testing
-- Validate Python syntax: `python -m py_compile src/*.py src/pages/*.py` -- completes in under 10 seconds.
-- **NO TESTING INFRASTRUCTURE EXISTS**: There are no unit tests, pytest configuration, or automated tests.
-- **NO LINTING CONFIGURATION**: No pylint, flake8, black, or other linting tools are configured.
+- **COMPREHENSIVE TESTING INFRASTRUCTURE**: 116+ unit, integration, and UI tests with pytest configuration
+- Run all tests: `pytest tests/ -v` -- takes ~3 seconds to complete
+- Test with coverage: `pytest tests/ --cov=src --cov-report=term-missing -v` -- takes ~3 seconds 
+- **Target coverage**: 85%+ as configured in pytest.ini
+- **Test categories**: Unit tests, integration tests, Streamlit UI tests, database tests
+- Validate Python syntax: `python -m py_compile src/*.py src/pages/*.py` -- completes in under 10 seconds
+- **NO LINTING CONFIGURATION**: No pylint, flake8, black, or other linting tools are configured
+- **Always** use Streamlit Testing Api to build ui validation for all ui features
+- Make sure not to be redundant on the test cases
 
-## Application Structure
+# Application Structure
 
 ### Main Components
 - **Entry point**: `src/Dashboard.py` - Main dashboard with analytics and charts
@@ -99,7 +105,7 @@ python -m py_compile src/*.py src/pages/*.py
 - **Auto-deployment**: GitHub Actions deploys to Fly.io on main branch pushes
 
 ## Important Limitations
-- **No automated testing**: Manual validation required for all changes
+- **Comprehensive automated testing available**: 116+ tests with pytest and coverage reporting
 - **No linting tools**: Code style validation must be done manually
 - **Password in environment**: AUTH password must be set as environment variable
 - **Docker SSL issues**: Builds may require trusted-host workarounds in restricted environments
