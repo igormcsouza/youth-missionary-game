@@ -32,8 +32,10 @@ Always reference these instructions first and fallback to search or bash command
 - **Test categories**: Unit tests, integration tests, Streamlit UI tests, database tests
 - Validate Python syntax: `python -m py_compile src/*.py src/pages/*.py` -- completes in under 10 seconds
 - **NO LINTING CONFIGURATION**: No pylint, flake8, black, or other linting tools are configured
+- **Always** use Streamlit Testing Api to build ui validation for all ui features
+- Make sure not to be redundant on the test cases
 
-## Application Structure
+# Application Structure
 
 ### Main Components
 - **Entry point**: `src/Dashboard.py` - Main dashboard with analytics and charts
