@@ -223,7 +223,6 @@ if weekly_books:
     week_labels = [f"Semana {week}" for week in weeks]
     
     # Create line chart
-    import plotly.express as px
     fig = px.line(
         x=week_labels, 
         y=deliveries,
