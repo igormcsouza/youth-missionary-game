@@ -579,3 +579,142 @@ class TestDashboardNewFeatures:
             for i, (youth_id, data) in enumerate(top_5):
                 expected_points = 70 - (i * 10)
                 assert data['weekly_points'] == expected_points
+
+
+class TestDashboardUILayoutImprovements:
+    """Test new UI layout improvements for Top 5 and countdown"""
+    
+    def test_top_5_layout_format_with_data(self):
+        """Test that Top 5 section displays correct layout with ranking and points separated"""
+        
+        with patch('Dashboard.CompiledFormDataRepository.get_all') as mock_compiled, \
+             patch('Dashboard.TasksFormDataRepository.get_all') as mock_tasks, \
+             patch('Dashboard.YouthFormDataRepository.get_all') as mock_youth:
+            
+            current_time = datetime.now()
+            last_sunday = current_time - timedelta(days=current_time.weekday() + 1)
+            this_week_timestamp = (last_sunday + timedelta(days=1)).timestamp()
+            
+            mock_youth.return_value = [
+                MagicMock(id=1, name="João Silva", organization="Rapazes", total_points=30),
+                MagicMock(id=2, name="Maria Santos", organization="Moças", total_points=20),
+            ]
+            
+            mock_tasks.return_value = [
+                MagicMock(id=1, points=10),
+            ]
+            
+            mock_compiled.return_value = [
+                MagicMock(youth_id=1, task_id=1, quantity=3, bonus=0, timestamp=this_week_timestamp),  # 30 pts
+                MagicMock(youth_id=2, task_id=1, quantity=2, bonus=0, timestamp=this_week_timestamp),  # 20 pts
+            ]
+            
+            os.chdir(os.path.join(os.path.dirname(__file__), '..', 'src'))
+            at = AppTest.from_file("Dashboard.py")
+            at.run()
+            
+            assert not at.exception
+            
+            # Check for Top 5 header
+            headers = [h.value for h in at.header]
+            assert "Top 5 da Semana" in headers
+            
+            # Check that layout contains both ranking/names and points in separate elements
+            markdown_elements = [md.value for md in at.markdown]
+            
+            # Should contain ranking + name format
+            found_ranking_format = False
+            found_points_format = False
+            
+            for md in markdown_elements:
+                if "#1 João Silva" in md and "🆕" in md:
+                    found_ranking_format = True
+                if "30pts" in md:
+                    found_points_format = True
+            
+            assert found_ranking_format, "Top 5 should display '#1 Name' format"
+            assert found_points_format, "Top 5 should display points separately"
+    
+    def test_countdown_centered_format(self):
+        """Test that countdown is displayed in centered format"""
+        
+        os.chdir(os.path.join(os.path.dirname(__file__), '..', 'src'))
+        at = AppTest.from_file("Dashboard.py")
+        at.run()
+        
+        assert not at.exception
+        
+        # Check for countdown HTML content with center styling
+        markdown_elements = [md.value for md in at.markdown]
+        
+        found_centered_countdown = False
+        for md in markdown_elements:
+            if "text-align: center" in md and "dias para o fim da gincana" in md:
+                found_centered_countdown = True
+                break
+        
+        assert found_centered_countdown, "Countdown should be centered with HTML styling"
+    
+    def test_top_5_empty_state_unchanged(self):
+        """Test that Top 5 empty state still displays correctly"""
+        
+        with patch('Dashboard.CompiledFormDataRepository.get_all') as mock_compiled, \
+             patch('Dashboard.TasksFormDataRepository.get_all') as mock_tasks, \
+             patch('Dashboard.YouthFormDataRepository.get_all') as mock_youth:
+            
+            # Mock empty data
+            mock_youth.return_value = []
+            mock_tasks.return_value = []
+            mock_compiled.return_value = []
+            
+            os.chdir(os.path.join(os.path.dirname(__file__), '..', 'src'))
+            at = AppTest.from_file("Dashboard.py")
+            at.run()
+            
+            assert not at.exception
+            
+            # Check that empty state info is displayed
+            info_elements = [info.value for info in at.info]
+            assert any("Nenhuma pontuação desta semana ainda." in info for info in info_elements)
+    
+    def test_top_5_position_indicators_preserved(self):
+        """Test that position change indicators are still displayed correctly"""
+        
+        with patch('Dashboard.CompiledFormDataRepository.get_all') as mock_compiled, \
+             patch('Dashboard.TasksFormDataRepository.get_all') as mock_tasks, \
+             patch('Dashboard.YouthFormDataRepository.get_all') as mock_youth:
+            
+            current_time = datetime.now()
+            last_sunday = current_time - timedelta(days=current_time.weekday() + 1)
+            this_week_timestamp = (last_sunday + timedelta(days=1)).timestamp()
+            
+            # Mock youth with previous total points (simulating they had points before this week)
+            mock_youth.return_value = [
+                MagicMock(id=1, name="Ana Costa", organization="Moças", total_points=50),  # Will show improvement
+            ]
+            
+            mock_tasks.return_value = [
+                MagicMock(id=1, points=10),
+            ]
+            
+            # Ana gained 30 points this week, so she had 20 before (simulating rank improvement)
+            mock_compiled.return_value = [
+                MagicMock(youth_id=1, task_id=1, quantity=3, bonus=0, timestamp=this_week_timestamp),  # 30 pts this week
+            ]
+            
+            os.chdir(os.path.join(os.path.dirname(__file__), '..', 'src'))
+            at = AppTest.from_file("Dashboard.py")
+            at.run()
+            
+            assert not at.exception
+            
+            # Check that position indicators are still present (NEW for first-time appearance)
+            markdown_elements = [md.value for md in at.markdown]
+            
+            found_position_indicator = False
+            for md in markdown_elements:
+                if "#1 Ana Costa" in md and "🆕" in md:
+                    found_position_indicator = True
+                    break
+            
+            assert found_position_indicator, "Position indicators should still be displayed in new format"
