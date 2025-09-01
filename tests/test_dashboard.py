@@ -333,3 +333,249 @@ class TestDashboardWeekCalculationEdgeCases:
         # Should point to start of current week (Sunday 2023-01-01)
         expected = datetime(2023, 1, 1, 0, 0, 0)
         assert result == expected
+
+
+class TestDashboardNewFeatures:
+    """Test new dashboard features: weekly leaderboard, book deliveries chart, countdown"""
+    
+    def test_remove_pessoas_na_igreja_from_activities(self):
+        """Test that 'Pessoas na igreja' metric is removed from dashboard"""
+        
+        # Check the activities array in Dashboard.py doesn't contain "Pessoas na igreja"
+        os.chdir(os.path.join(os.path.dirname(__file__), '..', 'src'))
+        at = AppTest.from_file("Dashboard.py")
+        at.run()
+        
+        # Should not contain "Pessoas na igreja" text in metrics
+        page_text = str(at)
+        assert "⛪ Pessoas na igreja" not in page_text
+    
+    def test_calculate_weekly_youth_points_function(self):
+        """Test the calculate_weekly_youth_points function"""
+        
+        with patch('Dashboard.CompiledFormDataRepository.get_all') as mock_compiled, \
+             patch('Dashboard.TasksFormDataRepository.get_all') as mock_tasks, \
+             patch('Dashboard.YouthFormDataRepository.get_all') as mock_youth:
+            
+            current_time = datetime.now()
+            last_sunday = current_time - timedelta(days=current_time.weekday() + 1)
+            this_week_timestamp = (last_sunday + timedelta(days=1)).timestamp()
+            old_timestamp = (last_sunday - timedelta(days=3)).timestamp()
+            
+            mock_youth.return_value = [
+                MagicMock(id=1, name="João", organization="Rapazes", total_points=100),
+                MagicMock(id=2, name="Maria", organization="Moças", total_points=80),
+            ]
+            
+            # Set the name attribute correctly
+            mock_youth.return_value[0].name = "João"
+            mock_youth.return_value[1].name = "Maria"
+            
+            mock_tasks.return_value = [
+                MagicMock(id=1, points=10),
+                MagicMock(id=2, points=15),
+            ]
+            
+            mock_compiled.return_value = [
+                MagicMock(youth_id=1, task_id=1, quantity=2, bonus=5, timestamp=this_week_timestamp),
+                MagicMock(youth_id=2, task_id=2, quantity=1, bonus=0, timestamp=this_week_timestamp),
+                MagicMock(youth_id=1, task_id=1, quantity=3, bonus=0, timestamp=old_timestamp),  # Old entry
+            ]
+            
+            weekly_points = Dashboard.calculate_weekly_youth_points()
+            
+            # João: 2 * 10 + 5 = 25 points this week
+            assert weekly_points[1]['name'] == "João"
+            assert weekly_points[1]['points'] == 25
+            
+            # Maria: 1 * 15 + 0 = 15 points this week
+            assert weekly_points[2]['name'] == "Maria"
+            assert weekly_points[2]['points'] == 15
+    
+    def test_calculate_position_changes_function(self):
+        """Test the calculate_position_changes function"""
+        
+        with patch('Dashboard.CompiledFormDataRepository.get_all') as mock_compiled, \
+             patch('Dashboard.TasksFormDataRepository.get_all') as mock_tasks, \
+             patch('Dashboard.YouthFormDataRepository.get_all') as mock_youth:
+            
+            current_time = datetime.now()
+            last_sunday = current_time - timedelta(days=current_time.weekday() + 1)
+            this_week_timestamp = (last_sunday + timedelta(days=1)).timestamp()
+            
+            # João: total 100, earned 30 this week, so last week total was 70
+            # Maria: total 80, earned 20 this week, so last week total was 60
+            # Pedro: total 90, earned 0 this week, so last week total was 90
+            
+            mock_youth.return_value = [
+                MagicMock(id=1, name="João", organization="Rapazes", total_points=100),
+                MagicMock(id=2, name="Maria", organization="Moças", total_points=80),
+                MagicMock(id=3, name="Pedro", organization="Rapazes", total_points=90),
+            ]
+            
+            # Set attributes correctly
+            for youth in mock_youth.return_value:
+                if youth.id == 1:
+                    youth.name = "João"
+                    youth.organization = "Rapazes"
+                elif youth.id == 2:
+                    youth.name = "Maria"
+                    youth.organization = "Moças"
+                elif youth.id == 3:
+                    youth.name = "Pedro"
+                    youth.organization = "Rapazes"
+            
+            mock_tasks.return_value = [
+                MagicMock(id=1, points=10),
+                MagicMock(id=2, points=20),
+            ]
+            
+            mock_compiled.return_value = [
+                MagicMock(youth_id=1, task_id=1, quantity=3, bonus=0, timestamp=this_week_timestamp),  # João: 30 pts
+                MagicMock(youth_id=2, task_id=2, quantity=1, bonus=0, timestamp=this_week_timestamp),  # Maria: 20 pts
+                # Pedro: 0 points this week
+            ]
+            
+            position_changes = Dashboard.calculate_position_changes()
+            
+            # This week: João(30), Maria(20)
+            # Last week: Pedro(90), João(70), Maria(60)
+            # João: moved from 2nd to 1st = ↑ 1
+            # Maria: moved from 3rd to 2nd = ↑ 1
+            
+            assert position_changes[1]['name'] == "João"
+            assert position_changes[1]['weekly_points'] == 30
+            assert "↑" in position_changes[1]['position_change']
+            
+            assert position_changes[2]['name'] == "Maria"
+            assert position_changes[2]['weekly_points'] == 20
+            assert "↑" in position_changes[2]['position_change']
+    
+    def test_calculate_weekly_book_deliveries_function(self):
+        """Test the calculate_weekly_book_deliveries function"""
+        
+        with patch('Dashboard.CompiledFormDataRepository.get_all') as mock_compiled, \
+             patch('Dashboard.TasksFormDataRepository.get_all') as mock_tasks:
+            
+            mock_tasks.return_value = [
+                MagicMock(id=1, tasks="Entregar Livro de Mórmon + foto + relato no grupo"),
+                MagicMock(id=2, tasks="Outras tarefas"),
+            ]
+            
+            # Create timestamps for different weeks
+            first_sunday = datetime(2023, 1, 1)  # Week 1 start
+            week1_timestamp = (first_sunday + timedelta(days=2)).timestamp()  # Tuesday week 1
+            week2_timestamp = (first_sunday + timedelta(days=9)).timestamp()  # Tuesday week 2
+            
+            mock_compiled.return_value = [
+                MagicMock(task_id=1, quantity=3, timestamp=week1_timestamp),
+                MagicMock(task_id=1, quantity=2, timestamp=week1_timestamp),
+                MagicMock(task_id=1, quantity=4, timestamp=week2_timestamp),
+                MagicMock(task_id=2, quantity=1, timestamp=week1_timestamp),  # Not a book delivery
+            ]
+            
+            weekly_deliveries = Dashboard.calculate_weekly_book_deliveries()
+            
+            # Week 1: 3 + 2 = 5 deliveries
+            # Week 2: 4 deliveries
+            assert weekly_deliveries[1] == 5
+            assert weekly_deliveries[2] == 4
+    
+    def test_calculate_countdown_function(self):
+        """Test the calculate_countdown function"""
+        
+        # Test with a date before the end
+        with freeze_time("2025-10-01"):
+            days = Dashboard.calculate_countdown()
+            assert days == 30  # October has 31 days, so Oct 1 to Oct 31 is 30 days
+        
+        # Test with a date after the end
+        with freeze_time("2025-11-01"):
+            days = Dashboard.calculate_countdown()
+            assert days == 0  # Should not show negative days
+        
+        # Test on the exact end date
+        with freeze_time("2025-10-31"):
+            days = Dashboard.calculate_countdown()
+            assert days == 0
+    
+    def test_dashboard_displays_new_sections(self):
+        """Test that new dashboard sections are displayed"""
+        
+        os.chdir(os.path.join(os.path.dirname(__file__), '..', 'src'))
+        at = AppTest.from_file("Dashboard.py")
+        at.run()
+        
+        # Check that dashboard loads without errors
+        assert not at.exception
+        
+        # Check that new headers are present
+        headers = [h.value for h in at.header]
+        assert "Top 5 da Semana" in headers
+    
+    def test_dashboard_handles_empty_weekly_data(self):
+        """Test dashboard handles cases with no weekly data gracefully"""
+        
+        with patch('Dashboard.CompiledFormDataRepository.get_all') as mock_compiled, \
+             patch('Dashboard.TasksFormDataRepository.get_all') as mock_tasks, \
+             patch('Dashboard.YouthFormDataRepository.get_all') as mock_youth:
+            
+            # Mock empty data
+            mock_youth.return_value = []
+            mock_tasks.return_value = []
+            mock_compiled.return_value = []
+            
+            # Should not raise exceptions
+            weekly_points = Dashboard.calculate_weekly_youth_points()
+            position_changes = Dashboard.calculate_position_changes()
+            weekly_books = Dashboard.calculate_weekly_book_deliveries()
+            countdown = Dashboard.calculate_countdown()
+            
+            assert weekly_points == {}
+            assert position_changes == {}
+            assert weekly_books == {}
+            assert countdown >= 0
+    
+    def test_leaderboard_top_5_limit(self):
+        """Test that leaderboard correctly limits to top 5 youth"""
+        
+        with patch('Dashboard.CompiledFormDataRepository.get_all') as mock_compiled, \
+             patch('Dashboard.TasksFormDataRepository.get_all') as mock_tasks, \
+             patch('Dashboard.YouthFormDataRepository.get_all') as mock_youth:
+            
+            current_time = datetime.now()
+            last_sunday = current_time - timedelta(days=current_time.weekday() + 1)
+            this_week_timestamp = (last_sunday + timedelta(days=1)).timestamp()
+            
+            # Create 7 youth with different weekly points
+            mock_youth.return_value = [
+                MagicMock(id=i, name=f"Youth{i}", organization="Rapazes", total_points=100-i)
+                for i in range(1, 8)
+            ]
+            
+            # Set attributes correctly
+            for youth in mock_youth.return_value:
+                youth.name = f"Youth{youth.id}"
+                youth.organization = "Rapazes"
+            
+            mock_tasks.return_value = [MagicMock(id=1, points=10)]
+            
+            # Give different weekly points: Youth1=70, Youth2=60, ..., Youth7=10
+            mock_compiled.return_value = [
+                MagicMock(youth_id=i, task_id=1, quantity=8-i, bonus=0, timestamp=this_week_timestamp)
+                for i in range(1, 8)
+            ]
+            
+            position_changes = Dashboard.calculate_position_changes()
+            
+            # Should have all 7 youth in results
+            assert len(position_changes) == 7
+            
+            # But when we sort and take top 5, it should be Youth1-Youth5
+            top_5 = sorted(position_changes.items(), key=lambda x: x[1]['weekly_points'], reverse=True)[:5]
+            assert len(top_5) == 5
+            
+            # Verify order: Youth1(70), Youth2(60), Youth3(50), Youth4(40), Youth5(30)
+            for i, (youth_id, data) in enumerate(top_5):
+                expected_points = 70 - (i * 10)
+                assert data['weekly_points'] == expected_points
