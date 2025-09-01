@@ -338,17 +338,67 @@ class TestDashboardWeekCalculationEdgeCases:
 class TestDashboardNewFeatures:
     """Test new dashboard features: weekly leaderboard, book deliveries chart, countdown"""
     
-    def test_remove_pessoas_na_igreja_from_activities(self):
-        """Test that 'Pessoas na igreja' metric is removed from dashboard"""
+    def test_activities_contain_correct_metrics_only(self):
+        """Test that dashboard activities array contains exactly the correct 5 activities"""
         
-        # Check the activities array in Dashboard.py doesn't contain "Pessoas na igreja"
-        os.chdir(os.path.join(os.path.dirname(__file__), '..', 'src'))
-        at = AppTest.from_file("Dashboard.py")
-        at.run()
+        # We can test this by checking the code structure directly
+        # Look at the activities array defined in the Dashboard.py file
+        dashboard_file = os.path.join(os.path.dirname(__file__), '..', 'src', 'Dashboard.py')
         
-        # Should not contain "Pessoas na igreja" text in metrics
-        page_text = str(at)
-        assert "⛪ Pessoas na igreja" not in page_text
+        with open(dashboard_file, 'r', encoding='utf-8') as f:
+            content = f.read()
+        
+        # Test that all expected activities are present in the source code
+        expected_activities = [
+            '"Livros de Mórmon"',
+            '"📖"',  # Book icon
+            '"Referências"',
+            '"📞"',  # Phone icon
+            '"Lições"',
+            '"👥"',  # People icon
+            '"Posts"',
+            '"📱"',  # Mobile icon
+            '"Noites familiares"',
+            '"🏠"',  # House icon
+        ]
+        
+        # Check that all expected activities are in the source code
+        for activity in expected_activities:
+            assert activity in content, f"Expected activity {activity} not found in Dashboard.py source code"
+        
+        # Ensure the removed activity is not present in the source code
+        assert '"Pessoas na igreja"' not in content, "Removed activity 'Pessoas na igreja' should not be present in source code"
+        assert '"⛪"' not in content, "Removed church icon should not be present in source code"
+        
+        # More robust check: find the activities array section
+        activities_start = content.find('activities = [')
+        if activities_start == -1:
+            pytest.fail("Could not find 'activities = [' in Dashboard.py")
+            
+        # Find the corresponding closing bracket by counting brackets
+        bracket_count = 0
+        activities_end = activities_start + len('activities = [') - 1  # Start from the opening bracket
+        
+        for i in range(activities_start + len('activities = ['), len(content)):
+            if content[i] == '[':
+                bracket_count += 1
+            elif content[i] == ']':
+                if bracket_count == 0:
+                    activities_end = i
+                    break
+                else:
+                    bracket_count -= 1
+        
+        activities_section = content[activities_start:activities_end + 1]
+        
+        # Count the number of activity tuples (each starts with a line containing just spaces and opening parenthesis)
+        import re
+        # Look for patterns like '        ("Activity Name",' which indicate the start of a tuple
+        tuple_pattern = r'^\s*\(".*?",'
+        tuple_matches = re.findall(tuple_pattern, activities_section, re.MULTILINE)
+        tuple_count = len(tuple_matches)
+        
+        assert tuple_count == 5, f"Expected exactly 5 activities in the array, but found {tuple_count}. Matches: {tuple_matches}"
     
     def test_calculate_weekly_youth_points_function(self):
         """Test the calculate_weekly_youth_points function"""
