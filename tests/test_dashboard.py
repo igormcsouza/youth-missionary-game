@@ -392,8 +392,8 @@ class TestDashboardNewFeatures:
             assert weekly_points[2]['name'] == "Maria"
             assert weekly_points[2]['points'] == 15
     
-    def test_calculate_position_changes_function(self):
-        """Test the calculate_position_changes function"""
+    def test_top_5_displays_weekly_points_with_total_ranking_order(self):
+        """Test that Top 5 shows youth in total points order but displays weekly points"""
         
         with patch('Dashboard.CompiledFormDataRepository.get_all') as mock_compiled, \
              patch('Dashboard.TasksFormDataRepository.get_all') as mock_tasks, \
@@ -403,27 +403,19 @@ class TestDashboardNewFeatures:
             last_sunday = current_time - timedelta(days=current_time.weekday() + 1)
             this_week_timestamp = (last_sunday + timedelta(days=1)).timestamp()
             
-            # João: total 100, earned 30 this week, so last week total was 70
-            # Maria: total 80, earned 20 this week, so last week total was 60
-            # Pedro: total 90, earned 0 this week, so last week total was 90
+            # Youth ranked by total points: João(100), Pedro(90), Maria(80)
+            # But weekly points: João(30), Maria(20), Pedro(0)
             
-            mock_youth.return_value = [
-                MagicMock(id=1, name="João", organization="Rapazes", total_points=100),
-                MagicMock(id=2, name="Maria", organization="Moças", total_points=80),
-                MagicMock(id=3, name="Pedro", organization="Rapazes", total_points=90),
-            ]
+            youth1 = MagicMock(id=1, name="João", organization="Rapazes", total_points=100)
+            youth2 = MagicMock(id=2, name="Maria", organization="Moças", total_points=80)
+            youth3 = MagicMock(id=3, name="Pedro", organization="Rapazes", total_points=90)
             
-            # Set attributes correctly
-            for youth in mock_youth.return_value:
-                if youth.id == 1:
-                    youth.name = "João"
-                    youth.organization = "Rapazes"
-                elif youth.id == 2:
-                    youth.name = "Maria"
-                    youth.organization = "Moças"
-                elif youth.id == 3:
-                    youth.name = "Pedro"
-                    youth.organization = "Rapazes"
+            # Set the name attributes correctly
+            youth1.name = "João"
+            youth2.name = "Maria"
+            youth3.name = "Pedro"
+            
+            mock_youth.return_value = [youth1, youth2, youth3]
             
             mock_tasks.return_value = [
                 MagicMock(id=1, points=10),
@@ -436,20 +428,14 @@ class TestDashboardNewFeatures:
                 # Pedro: 0 points this week
             ]
             
-            position_changes = Dashboard.calculate_position_changes()
+            weekly_points_data = Dashboard.calculate_weekly_youth_points()
             
-            # This week: João(30), Maria(20)
-            # Last week: Pedro(90), João(70), Maria(60)
-            # João: moved from 2nd to 1st = ↑ 1
-            # Maria: moved from 3rd to 2nd = ↑ 1
+            # Verify weekly points calculation
+            assert weekly_points_data[1]['name'] == "João"
+            assert weekly_points_data[1]['points'] == 30
             
-            assert position_changes[1]['name'] == "João"
-            assert position_changes[1]['weekly_points'] == 30
-            assert "↑" in position_changes[1]['position_change']
-            
-            assert position_changes[2]['name'] == "Maria"
-            assert position_changes[2]['weekly_points'] == 20
-            assert "↑" in position_changes[2]['position_change']
+            assert weekly_points_data[2]['name'] == "Maria"
+            assert weekly_points_data[2]['points'] == 20
     
     def test_calculate_weekly_book_deliveries_function(self):
         """Test the calculate_weekly_book_deliveries function"""
@@ -527,12 +513,10 @@ class TestDashboardNewFeatures:
             
             # Should not raise exceptions
             weekly_points = Dashboard.calculate_weekly_youth_points()
-            position_changes = Dashboard.calculate_position_changes()
             weekly_books = Dashboard.calculate_weekly_book_deliveries()
             countdown = Dashboard.calculate_countdown()
             
             assert weekly_points == {}
-            assert position_changes == {}
             assert weekly_books == {}
             assert countdown >= 0
     
@@ -548,15 +532,12 @@ class TestDashboardNewFeatures:
             this_week_timestamp = (last_sunday + timedelta(days=1)).timestamp()
             
             # Create 7 youth with different weekly points
-            mock_youth.return_value = [
-                MagicMock(id=i, name=f"Youth{i}", organization="Rapazes", total_points=100-i)
-                for i in range(1, 8)
-            ]
+            youth_mocks = []
+            for i in range(1, 8):
+                youth = MagicMock(id=i, name=f"Youth{i}", organization="Rapazes", total_points=100-i)
+                youth_mocks.append(youth)
             
-            # Set attributes correctly
-            for youth in mock_youth.return_value:
-                youth.name = f"Youth{youth.id}"
-                youth.organization = "Rapazes"
+            mock_youth.return_value = youth_mocks
             
             mock_tasks.return_value = [MagicMock(id=1, points=10)]
             
@@ -566,26 +547,23 @@ class TestDashboardNewFeatures:
                 for i in range(1, 8)
             ]
             
-            position_changes = Dashboard.calculate_position_changes()
+            weekly_points_data = Dashboard.calculate_weekly_youth_points()
             
-            # Should have all 7 youth in results
-            assert len(position_changes) == 7
+            # Should have all 7 youth with weekly points
+            assert len(weekly_points_data) == 7
             
-            # But when we sort and take top 5, it should be Youth1-Youth5
-            top_5 = sorted(position_changes.items(), key=lambda x: x[1]['weekly_points'], reverse=True)[:5]
-            assert len(top_5) == 5
-            
-            # Verify order: Youth1(70), Youth2(60), Youth3(50), Youth4(40), Youth5(30)
-            for i, (youth_id, data) in enumerate(top_5):
-                expected_points = 70 - (i * 10)
-                assert data['weekly_points'] == expected_points
+            # The Top 5 should be based on total points ranking (Youth1-Youth5), not weekly points
+            youth_entries = [mock_youth.return_value[i] for i in range(5)]  # First 5 by total points
+            for i, youth in enumerate(youth_entries):
+                expected_weekly_points = 70 - (i * 10)  # Youth1=70, Youth2=60, etc.
+                assert weekly_points_data[youth.id]['points'] == expected_weekly_points
 
 
 class TestDashboardUILayoutImprovements:
     """Test new UI layout improvements for Top 5 and countdown"""
     
     def test_top_5_layout_format_with_data(self):
-        """Test that Top 5 section displays correct layout with ranking and points separated"""
+        """Test that Top 5 section displays correct layout using st.metric format"""
         
         with patch('Dashboard.CompiledFormDataRepository.get_all') as mock_compiled, \
              patch('Dashboard.TasksFormDataRepository.get_all') as mock_tasks, \
@@ -595,10 +573,14 @@ class TestDashboardUILayoutImprovements:
             last_sunday = current_time - timedelta(days=current_time.weekday() + 1)
             this_week_timestamp = (last_sunday + timedelta(days=1)).timestamp()
             
-            mock_youth.return_value = [
-                MagicMock(id=1, name="João Silva", organization="Rapazes", total_points=30),
-                MagicMock(id=2, name="Maria Santos", organization="Moças", total_points=20),
-            ]
+            youth1 = MagicMock(id=1, name="João Silva", organization="Rapazes", total_points=30)
+            youth2 = MagicMock(id=2, name="Maria Santos", organization="Moças", total_points=20)
+            
+            # Set attributes correctly
+            youth1.name = "João Silva"
+            youth2.name = "Maria Santos"
+            
+            mock_youth.return_value = [youth1, youth2]
             
             mock_tasks.return_value = [
                 MagicMock(id=1, points=10),
@@ -619,24 +601,16 @@ class TestDashboardUILayoutImprovements:
             headers = [h.value for h in at.header]
             assert "Top 5 da Semana" in headers
             
-            # Check that layout contains both ranking/names and points in separate elements
-            markdown_elements = [md.value for md in at.markdown]
+            # Check for caption about weekly points
+            captions = [c.value for c in at.caption]
+            assert any("Pontos obtidos na semana atual" in caption for caption in captions)
             
-            # Should contain ranking + name format
-            found_ranking_format = False
-            found_points_format = False
-            
-            for md in markdown_elements:
-                if "#1 João Silva" in md and "🆕" in md:
-                    found_ranking_format = True
-                if "30pts" in md:
-                    found_points_format = True
-            
-            assert found_ranking_format, "Top 5 should display '#1 Name' format"
-            assert found_points_format, "Top 5 should display points separately"
+            # Check that metrics are displayed (new format)
+            metrics = [m for m in at.metric]
+            assert len(metrics) >= 2  # Should have at least 2 metrics for the youth
     
-    def test_countdown_centered_format(self):
-        """Test that countdown is displayed in centered format"""
+    def test_countdown_simple_format(self):
+        """Test that countdown is displayed in simple markdown format"""
         
         os.chdir(os.path.join(os.path.dirname(__file__), '..', 'src'))
         at = AppTest.from_file("Dashboard.py")
@@ -644,16 +618,16 @@ class TestDashboardUILayoutImprovements:
         
         assert not at.exception
         
-        # Check for countdown HTML content with center styling
+        # Check for countdown markdown content (reverted back to simple format)
         markdown_elements = [md.value for md in at.markdown]
         
-        found_centered_countdown = False
+        found_countdown = False
         for md in markdown_elements:
-            if "text-align: center" in md and "dias para o fim da gincana" in md:
-                found_centered_countdown = True
+            if "dias para o fim da gincana" in md and "**" in md:
+                found_countdown = True
                 break
         
-        assert found_centered_countdown, "Countdown should be centered with HTML styling"
+        assert found_countdown, "Countdown should be displayed in simple markdown format"
     
     def test_top_5_empty_state_unchanged(self):
         """Test that Top 5 empty state still displays correctly"""

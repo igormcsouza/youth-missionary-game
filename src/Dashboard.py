@@ -88,77 +88,6 @@ def calculate_weekly_youth_points():
     
     return weekly_points
 
-# Calculate position changes from last week to this week
-def calculate_position_changes():
-    """Calculate position changes for each youth compared to last week"""
-    compiled_entries = CompiledFormDataRepository.get_all()
-    task_entries = TasksFormDataRepository.get_all()
-    youth_entries = YouthFormDataRepository.get_all()
-    
-    task_dict = {t.id: t for t in task_entries}
-    youth_dict = {y.id: y for y in youth_entries}
-    
-    last_sunday = get_last_sunday()
-    sunday_timestamp = last_sunday.timestamp()
-    
-    # Calculate weekly points and last week points for each youth
-    weekly_points = {}
-    last_week_total_points = {}
-    
-    for youth in youth_entries:
-        weekly_points[youth.id] = 0
-        last_week_total_points[youth.id] = youth.total_points
-    
-    # Calculate this week's points
-    for entry in compiled_entries:
-        if entry.timestamp >= sunday_timestamp:  # This week
-            task = task_dict.get(entry.task_id)
-            if task:
-                points = task.points * entry.quantity + entry.bonus
-                weekly_points[entry.youth_id] = weekly_points.get(entry.youth_id, 0) + points
-                # Subtract this week's points from total to get last week's total
-                last_week_total_points[entry.youth_id] -= points
-    
-    # Create rankings
-    this_week_ranking = sorted(
-        [(youth_id, weekly_points[youth_id]) for youth_id in weekly_points if weekly_points[youth_id] > 0],
-        key=lambda x: x[1], reverse=True
-    )
-    
-    last_week_ranking = sorted(
-        [(youth_id, last_week_total_points[youth_id]) for youth_id in last_week_total_points if last_week_total_points[youth_id] > 0],
-        key=lambda x: x[1], reverse=True
-    )
-    
-    # Create position dictionaries
-    this_week_positions = {youth_id: idx + 1 for idx, (youth_id, _) in enumerate(this_week_ranking)}
-    last_week_positions = {youth_id: idx + 1 for idx, (youth_id, _) in enumerate(last_week_ranking)}
-    
-    # Calculate position changes
-    position_changes = {}
-    for youth_id in this_week_positions:
-        youth = youth_dict[youth_id]
-        current_pos = this_week_positions[youth_id]
-        last_pos = last_week_positions.get(youth_id, None)
-        
-        if last_pos is None:
-            change = "NEW"
-        elif current_pos < last_pos:
-            change = f"↑ {last_pos - current_pos}"
-        elif current_pos > last_pos:
-            change = f"↓ {current_pos - last_pos}"
-        else:
-            change = "─"
-        
-        position_changes[youth_id] = {
-            'name': youth.name,
-            'organization': youth.organization,
-            'weekly_points': weekly_points[youth_id],
-            'position_change': change,
-            'current_position': current_pos
-        }
-    
-    return position_changes
 
 # Calculate weekly "Livros de Mórmon" deliveries
 def calculate_weekly_book_deliveries():
@@ -240,6 +169,34 @@ youth_entries = YouthFormDataRepository.get_all()
 filtered_youth = [y for y in youth_entries if y.total_points > 0]
 sorted_youth = sorted(filtered_youth, key=lambda y: y.total_points, reverse=True)
 
+# Top 5 da Semana (pontos semanais)
+st.header("Top 5 da Semana")
+st.caption("Pontos obtidos na semana atual (domingo a sábado)")
+
+if sorted_youth:
+    # Get weekly points for each youth
+    weekly_points_data = calculate_weekly_youth_points()
+    
+    # Create Top 5 based on total ranking but show weekly points
+    top_5_youth = sorted_youth[:5]
+    
+    if top_5_youth:
+        # Display in a single row using columns
+        cols = st.columns(5)
+        
+        for idx, youth in enumerate(top_5_youth):
+            weekly_points = weekly_points_data.get(youth.id, {}).get('points', 0)
+            
+            with cols[idx]:
+                st.metric(
+                    label=f"#{idx + 1} {youth.name} ({youth.organization})",
+                    value=f"{weekly_points} pts"
+                )
+    else:
+        st.info("Nenhuma pontuação desta semana ainda.")
+else:
+    st.info("Nenhum jovem cadastrado ainda.")
+
 st.header("Ranking dos Jovens por Pontuação Total")
 if sorted_youth:
     df = pd.DataFrame([
@@ -254,35 +211,6 @@ if sorted_youth:
     st.dataframe(df, hide_index=True)
 else:
     st.info("Nenhum jovem cadastrado ainda.")
-
-# Weekly Leaderboard: Top 5 Youth of the Week
-st.header("Top 5 da Semana")
-position_changes = calculate_position_changes()
-if position_changes:
-    # Sort by weekly points and take top 5
-    top_5 = sorted(position_changes.items(), key=lambda x: x[1]['weekly_points'], reverse=True)[:5]
-    
-    for idx, (youth_id, data) in enumerate(top_5):
-        col1, col2 = st.columns([4, 1])
-        
-        with col1:
-            # Format position change with appropriate color
-            change_text = data['position_change']
-            rank_number = f"#{idx + 1}"
-            
-            if change_text.startswith("↑"):
-                st.markdown(f"**{rank_number} {data['name']}** :green[{change_text}]")
-            elif change_text.startswith("↓"):
-                st.markdown(f"**{rank_number} {data['name']}** :red[{change_text}]")
-            elif change_text == "NEW":
-                st.markdown(f"**{rank_number} {data['name']}** 🆕")
-            else:
-                st.markdown(f"**{rank_number} {data['name']}** ─")
-        
-        with col2:
-            st.markdown(f"**{data['weekly_points']}pts**")
-else:
-    st.info("Nenhuma pontuação desta semana ainda.")
 
 # Weekly Graph: "Livros de Mórmon" Delivered
 weekly_books = calculate_weekly_book_deliveries()
@@ -347,9 +275,5 @@ else:
 # Countdown to End of Game
 days_remaining = calculate_countdown()
 st.markdown("---")
-col1, col2, col3 = st.columns([1, 2, 1])
-with col2:
-    st.markdown(f"<h3 style='text-align: center;'>Ainda faltam {days_remaining} dias para o fim da gincana!</h3>", 
-               unsafe_allow_html=True)
-    st.markdown("<p style='text-align: center; color: gray;'>A gincana termina em 31 de outubro de 2025</p>", 
-               unsafe_allow_html=True)
+st.markdown(f"**Ainda faltam {days_remaining} dias para o fim da gincana!**", 
+           help="A gincana termina em 31 de outubro de 2025")
