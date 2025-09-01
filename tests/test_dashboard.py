@@ -1,6 +1,7 @@
 import pytest
 import os
 import sys
+import re
 from datetime import datetime, timedelta
 from unittest.mock import patch, MagicMock, Mock
 import pandas as pd
@@ -392,7 +393,6 @@ class TestDashboardNewFeatures:
         activities_section = content[activities_start:activities_end + 1]
         
         # Count the number of activity tuples (each starts with a line containing just spaces and opening parenthesis)
-        import re
         # Look for patterns like '        ("Activity Name",' which indicate the start of a tuple
         tuple_pattern = r'^\s*\(".*?",'
         tuple_matches = re.findall(tuple_pattern, activities_section, re.MULTILINE)
