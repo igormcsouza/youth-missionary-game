@@ -263,22 +263,24 @@ if position_changes:
     top_5 = sorted(position_changes.items(), key=lambda x: x[1]['weekly_points'], reverse=True)[:5]
     
     for idx, (youth_id, data) in enumerate(top_5):
-        col1, col2 = st.columns([3, 1])
+        col1, col2 = st.columns([4, 1])
         
         with col1:
             # Format position change with appropriate color
             change_text = data['position_change']
+            rank_number = f"#{idx + 1}"
+            
             if change_text.startswith("↑"):
-                st.markdown(f"**{data['name']}** :green[{change_text}] {data['weekly_points']}pts")
+                st.markdown(f"**{rank_number} {data['name']}** :green[{change_text}]")
             elif change_text.startswith("↓"):
-                st.markdown(f"**{data['name']}** :red[{change_text}] {data['weekly_points']}pts")
+                st.markdown(f"**{rank_number} {data['name']}** :red[{change_text}]")
             elif change_text == "NEW":
-                st.markdown(f"**{data['name']}** 🆕 {data['weekly_points']}pts")
+                st.markdown(f"**{rank_number} {data['name']}** 🆕")
             else:
-                st.markdown(f"**{data['name']}** ─ {data['weekly_points']}pts")
+                st.markdown(f"**{rank_number} {data['name']}** ─")
         
         with col2:
-            st.markdown(f"#{idx + 1}")
+            st.markdown(f"**{data['weekly_points']}pts**")
 else:
     st.info("Nenhuma pontuação desta semana ainda.")
 
@@ -345,5 +347,9 @@ else:
 # Countdown to End of Game
 days_remaining = calculate_countdown()
 st.markdown("---")
-st.markdown(f"**Ainda faltam {days_remaining} dias para o fim da gincana!**", 
-           help="A gincana termina em 31 de outubro de 2025")
+col1, col2, col3 = st.columns([1, 2, 1])
+with col2:
+    st.markdown(f"<h3 style='text-align: center;'>Ainda faltam {days_remaining} dias para o fim da gincana!</h3>", 
+               unsafe_allow_html=True)
+    st.markdown("<p style='text-align: center; color: gray;'>A gincana termina em 31 de outubro de 2025</p>", 
+               unsafe_allow_html=True)
