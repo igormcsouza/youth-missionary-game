@@ -1,10 +1,14 @@
-import pandas as pd
-import streamlit as st
-import plotly.graph_objects as go
 from datetime import datetime, timedelta
 
-from database import YouthFormDataRepository, TasksFormDataRepository, CompiledFormDataRepository
+import pandas as pd
+import plotly.graph_objects as go
+import streamlit as st
 
+from database import (
+    CompiledFormDataRepository,
+    TasksFormDataRepository,
+    YouthFormDataRepository,
+)
 
 st.set_page_config(page_title="Dashboard", page_icon="📊")
 
@@ -20,12 +24,13 @@ def get_last_sunday():
     # Set to beginning of Sunday
     return last_sunday.replace(hour=0, minute=0, second=0, microsecond=0)
 
+
 # Calculate totals for specific missionary activities
 def calculate_task_totals():
     compiled_entries = CompiledFormDataRepository.get_all()
     task_entries = TasksFormDataRepository.get_all()
     task_dict = {t.id: t for t in task_entries}
-    
+
     # Define the specific tasks we want to track with Portuguese display names
     target_tasks = {
         "Entregar Livro de Mórmon + foto + relato no grupo": "Livros de Mórmon entregues",
@@ -33,52 +38,78 @@ def calculate_task_totals():
         "Dar contato (tel/endereço) às Sisteres": "Referências",
         "Visitar com as Sisteres": "Lições",
         "Postar mensagem do evangelho nas redes sociais + print": "Posts nas redes sociais",
-        "Fazer noite familiar com pesquisador": "Sessões de noite familiar"
+        "Fazer noite familiar com pesquisador": "Sessões de noite familiar",
     }
-    
+
     # Calculate totals and deltas since last Sunday (week runs Sunday to Saturday)
-    totals = {display_name: 0 for display_name in target_tasks.values()}
-    deltas = {display_name: 0 for display_name in target_tasks.values()}
-    
+    totals = dict.fromkeys(target_tasks.values(), 0)
+    deltas = dict.fromkeys(target_tasks.values(), 0)
+
     last_sunday = get_last_sunday()
     # Week starts on Sunday, not Monday after Sunday
     sunday_timestamp = last_sunday.timestamp()
-    
+
     for entry in compiled_entries:
         task = task_dict.get(entry.task_id)
         if task and task.tasks in target_tasks:
             display_name = target_tasks[task.tasks]
             totals[display_name] += entry.quantity
-            
+
             # Count activities since last Sunday (current week)
             if entry.timestamp >= sunday_timestamp:
                 deltas[display_name] += entry.quantity
-    
+
     return totals, deltas
+
 
 # Display missionary activity totals as cards
 activity_totals, activity_deltas = calculate_task_totals()
 if any(total > 0 for total in activity_totals.values()):
     st.header("Totais das Atividades Missionárias")
-    
+
     # Create columns for the cards
     cols = st.columns(6)
-    
+
     activities = [
-        ("Livros de Mórmon", "📖", activity_totals["Livros de Mórmon entregues"], activity_deltas["Livros de Mórmon entregues"]),
-        ("Pessoas na igreja", "⛪", activity_totals["Pessoas levadas à igreja"], activity_deltas["Pessoas levadas à igreja"]),
-        ("Referências", "📞", activity_totals["Referências"], activity_deltas["Referências"]),
+        (
+            "Livros de Mórmon",
+            "📖",
+            activity_totals["Livros de Mórmon entregues"],
+            activity_deltas["Livros de Mórmon entregues"],
+        ),
+        (
+            "Pessoas na igreja",
+            "⛪",
+            activity_totals["Pessoas levadas à igreja"],
+            activity_deltas["Pessoas levadas à igreja"],
+        ),
+        (
+            "Referências",
+            "📞",
+            activity_totals["Referências"],
+            activity_deltas["Referências"],
+        ),
         ("Lições", "👥", activity_totals["Lições"], activity_deltas["Lições"]),
-        ("Posts", "📱", activity_totals["Posts nas redes sociais"], activity_deltas["Posts nas redes sociais"]),
-        ("Noites familiares", "🏠", activity_totals["Sessões de noite familiar"], activity_deltas["Sessões de noite familiar"])
+        (
+            "Posts",
+            "📱",
+            activity_totals["Posts nas redes sociais"],
+            activity_deltas["Posts nas redes sociais"],
+        ),
+        (
+            "Noites familiares",
+            "🏠",
+            activity_totals["Sessões de noite familiar"],
+            activity_deltas["Sessões de noite familiar"],
+        ),
     ]
-    
+
     for i, (name, icon, total, delta) in enumerate(activities):
         with cols[i]:
             st.metric(
                 label=f"{icon} {name}",
                 value=str(total),
-                delta=f"+{delta} novos" if delta > 0 else None
+                delta=f"+{delta} novos" if delta > 0 else None,
             )
 
 
@@ -89,15 +120,18 @@ sorted_youth = sorted(filtered_youth, key=lambda y: y.total_points, reverse=True
 
 st.header("Ranking dos Jovens por Pontuação Total")
 if sorted_youth:
-    df = pd.DataFrame([
-        {
-            "Ranking": idx + 1,
-            "Nome": y.name,
-            "Idade": y.age,
-            "Organização": y.organization,
-            "Pontuação Total": y.total_points
-        } for idx, y in enumerate(sorted_youth)
-    ])
+    df = pd.DataFrame(
+        [
+            {
+                "Ranking": idx + 1,
+                "Nome": y.name,
+                "Idade": y.age,
+                "Organização": y.organization,
+                "Pontuação Total": y.total_points,
+            }
+            for idx, y in enumerate(sorted_youth)
+        ]
+    )
     st.dataframe(df, hide_index=True)
 else:
     st.info("Nenhum jovem cadastrado ainda.")
@@ -116,25 +150,49 @@ for entry in compiled_entries:
 
 if task_points:
     st.header("Tarefas Mais Pontuadas")
-    df = pd.DataFrame({"Tarefa": list(task_points.keys()), "Pontuação": list(task_points.values())})
-    fig = go.Figure(data=[go.Pie(labels=df["Tarefa"], values=df["Pontuação"], title="Pontuação por Tarefa")])
+    df = pd.DataFrame(
+        {"Tarefa": list(task_points.keys()), "Pontuação": list(task_points.values())}
+    )
+    fig = go.Figure(
+        data=[
+            go.Pie(
+                labels=df["Tarefa"],
+                values=df["Pontuação"],
+                title="Pontuação por Tarefa",
+            )
+        ]
+    )
     st.plotly_chart(fig, use_container_width=True)
 else:
     st.info("Nenhuma pontuação de tarefa disponível.")
 
 # Bar chart: Total points for Young Man and Young Woman
-young_man_points = sum(y.total_points for y in youth_entries if y.organization == "Rapazes")
-young_woman_points = sum(y.total_points for y in youth_entries if y.organization == "Moças")
+young_man_points = sum(
+    y.total_points for y in youth_entries if y.organization == "Rapazes"
+)
+young_woman_points = sum(
+    y.total_points for y in youth_entries if y.organization == "Moças"
+)
 COLOR_YOUNG_MAN, COLOR_YOUNG_WOMAN = ["#1f77b4", "#e75480"]
 
 if young_man_points == 0 and young_woman_points == 0:
     st.info("Nenhuma pontuação total disponível para Rapazes e Moças.")
 else:
     st.header("Pontuação Total por Organização")
-    bar_df = pd.DataFrame({
-        "Organização": ["Rapazes", "Moças"],
-        "Pontuação Total": [young_man_points, young_woman_points]
-    })
-    bar_fig = go.Figure(data=[go.Bar(x=bar_df["Organização"], y=bar_df["Pontuação Total"], marker_color=[COLOR_YOUNG_MAN, COLOR_YOUNG_WOMAN] )])
+    bar_df = pd.DataFrame(
+        {
+            "Organização": ["Rapazes", "Moças"],
+            "Pontuação Total": [young_man_points, young_woman_points],
+        }
+    )
+    bar_fig = go.Figure(
+        data=[
+            go.Bar(
+                x=bar_df["Organização"],
+                y=bar_df["Pontuação Total"],
+                marker_color=[COLOR_YOUNG_MAN, COLOR_YOUNG_WOMAN],
+            )
+        ]
+    )
     bar_fig.update_layout(yaxis_title="Pontuação Total", xaxis_title="Organização")
     st.plotly_chart(bar_fig, use_container_width=True)

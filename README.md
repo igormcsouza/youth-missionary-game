@@ -26,7 +26,8 @@ A Streamlit-based web application for managing youth missionary competitions. Th
 
 2. **Install dependencies:**
    ```bash
-   pip install -r requirements.txt
+   pip install poetry
+   poetry install
    ```
 
 3. **Set up authentication (optional for development):**
@@ -36,7 +37,7 @@ A Streamlit-based web application for managing youth missionary competitions. Th
 
 4. **Run the application:**
    ```bash
-   streamlit run src/Dashboard.py
+   poetry run streamlit run src/Dashboard.py
    ```
 
 5. **Open your browser and navigate to:** `http://localhost:8501`
@@ -120,9 +121,34 @@ flyctl secrets set POSTGRESCONNECTIONSTRING="your-postgres-connection-string"
 
 This project includes comprehensive testing with pytest and coverage reporting. Tests are automatically run on every push and pull request.
 
-- **Run tests locally**: `pytest tests/ --cov=src --cov-report=term-missing -v`
+- **Run tests locally**: `poetry run pytest tests/ --cov=src --cov-report=term-missing -v`
 - **Target coverage**: 85%+
 - **Test categories**: Unit tests, integration tests, Streamlit UI tests
+
+### Code Quality
+
+This project uses modern Python tooling for code quality:
+
+- **Dependency Management**: Poetry for dependency management and virtual environments
+- **Linting**: Ruff for fast Python linting and code formatting
+- **Formatting**: Automatic code formatting with Ruff
+- **CI/CD**: Automated linting and testing on every commit
+
+#### Code Quality Commands
+
+```bash
+# Run linting and formatting checks
+poetry run ruff check src/ tests/
+
+# Auto-fix linting issues
+poetry run ruff check --fix src/ tests/
+
+# Format code
+poetry run ruff format src/ tests/
+
+# Run all tests with coverage
+poetry run pytest tests/ --cov=src --cov-report=term-missing -v
+```
 
 ## License
 

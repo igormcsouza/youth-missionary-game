@@ -1,21 +1,23 @@
-import os
 import datetime as dt
-from typing import Optional, Sequence
+import os
+from collections.abc import Sequence
 
-from sqlmodel import SQLModel, Field, create_engine, Session, select
+from sqlmodel import Field, Session, SQLModel, create_engine, select
+
 from utils import handle_database_operation
-
 
 # Define the model for YouthFormData
 default_db_path = "sqlite:///youth_data.db"
 
+
 class YouthFormData(SQLModel, table=True):
     __table_args__ = {"extend_existing": True}
-    id: Optional[int] = Field(default=None, primary_key=True)
+    id: int | None = Field(default=None, primary_key=True)
     name: str
     age: int
     organization: str
     total_points: int
+
 
 class YouthFormDataRepository:
     @staticmethod
@@ -29,26 +31,26 @@ class YouthFormDataRepository:
                     session.commit()
                     session.refresh(entry)
                 return entry
-        
+
         return handle_database_operation(
-            _update_operation, 
-            "atualização da pontuação do jovem"
+            _update_operation, "atualização da pontuação do jovem"
         )
-    
+
     @staticmethod
-    def store(name: str, age: int, organization: str, total_points: int) -> Optional[YouthFormData]:
+    def store(
+        name: str, age: int, organization: str, total_points: int
+    ) -> YouthFormData | None:
         def _store_operation():
-            entry = YouthFormData(name=name, age=age, organization=organization, total_points=total_points)
+            entry = YouthFormData(
+                name=name, age=age, organization=organization, total_points=total_points
+            )
             with Session(engine) as session:
                 session.add(entry)
                 session.commit()
                 session.refresh(entry)
             return entry
-        
-        return handle_database_operation(
-            _store_operation,
-            "cadastro do jovem"
-        )
+
+        return handle_database_operation(_store_operation, "cadastro do jovem")
 
     @staticmethod
     def get_all() -> Sequence[YouthFormData]:
@@ -57,10 +59,9 @@ class YouthFormDataRepository:
                 statement = select(YouthFormData)
                 results = session.exec(statement).all()
             return results
-        
+
         result = handle_database_operation(
-            _get_all_operation,
-            "busca dos jovens cadastrados"
+            _get_all_operation, "busca dos jovens cadastrados"
         )
         return result if result is not None else []
 
@@ -74,24 +75,22 @@ class YouthFormDataRepository:
                     session.commit()
                     return True
                 return False
-        
-        result = handle_database_operation(
-            _delete_operation,
-            "exclusão do jovem"
-        )
+
+        result = handle_database_operation(_delete_operation, "exclusão do jovem")
         return result if result is not None else False
 
 
 class TasksFormData(SQLModel, table=True):
     __table_args__ = {"extend_existing": True}
-    id: Optional[int] = Field(default=None, primary_key=True)
+    id: int | None = Field(default=None, primary_key=True)
     tasks: str
     points: int
     repeatable: bool
 
+
 class TasksFormDataRepository:
     @staticmethod
-    def store(tasks: str, points: int, repeatable: bool) -> Optional[TasksFormData]:
+    def store(tasks: str, points: int, repeatable: bool) -> TasksFormData | None:
         def _store_operation():
             entry = TasksFormData(tasks=tasks, points=points, repeatable=repeatable)
             with Session(engine) as session:
@@ -99,11 +98,8 @@ class TasksFormDataRepository:
                 session.commit()
                 session.refresh(entry)
             return entry
-        
-        return handle_database_operation(
-            _store_operation,
-            "cadastro da tarefa"
-        )
+
+        return handle_database_operation(_store_operation, "cadastro da tarefa")
 
     @staticmethod
     def get_all() -> Sequence[TasksFormData]:
@@ -112,10 +108,9 @@ class TasksFormDataRepository:
                 statement = select(TasksFormData)
                 results = session.exec(statement).all()
             return results
-        
+
         result = handle_database_operation(
-            _get_all_operation,
-            "busca das tarefas cadastradas"
+            _get_all_operation, "busca das tarefas cadastradas"
         )
         return result if result is not None else []
 
@@ -129,42 +124,42 @@ class TasksFormDataRepository:
                     session.commit()
                     return True
                 return False
-        
-        result = handle_database_operation(
-            _delete_operation,
-            "exclusão da tarefa"
-        )
+
+        result = handle_database_operation(_delete_operation, "exclusão da tarefa")
         return result if result is not None else False
+
 
 class CompiledFormData(SQLModel, table=True):
     __table_args__ = {"extend_existing": True}
-    id: Optional[int] = Field(default=None, primary_key=True)
+    id: int | None = Field(default=None, primary_key=True)
     youth_id: int = Field(foreign_key="youthformdata.id")
     task_id: int = Field(foreign_key="tasksformdata.id")
     timestamp: float
     quantity: int
     bonus: int
 
+
 class CompiledFormDataRepository:
     @staticmethod
-    def store(youth_id: int, task_id: int, timestamp: float, quantity: int, bonus: int) -> Optional[CompiledFormData]:
+    def store(
+        youth_id: int, task_id: int, timestamp: float, quantity: int, bonus: int
+    ) -> CompiledFormData | None:
         def _store_operation():
             entry = CompiledFormData(
                 youth_id=youth_id,
                 task_id=task_id,
                 timestamp=timestamp,
                 quantity=quantity,
-                bonus=bonus
+                bonus=bonus,
             )
             with Session(engine) as session:
                 session.add(entry)
                 session.commit()
                 session.refresh(entry)
             return entry
-        
+
         return handle_database_operation(
-            _store_operation,
-            "registro da tarefa compilada"
+            _store_operation, "registro da tarefa compilada"
         )
 
     @staticmethod
@@ -174,37 +169,36 @@ class CompiledFormDataRepository:
                 statement = select(CompiledFormData)
                 results = session.exec(statement).all()
             return results
-        
+
         result = handle_database_operation(
-            _get_all_operation,
-            "busca dos registros de tarefas"
+            _get_all_operation, "busca dos registros de tarefas"
         )
         return result if result is not None else []
 
     @staticmethod
     def has_entry_today(youth_id: int, task_id: int) -> bool:
         """Check if there's already an entry for the same youth and task on the same day"""
+
         def _check_operation():
             today = dt.date.today()
             today_start = dt.datetime.combine(today, dt.time.min)
             tomorrow_start = today_start + dt.timedelta(days=1)
-            
+
             today_start_timestamp = today_start.timestamp()
             tomorrow_start_timestamp = tomorrow_start.timestamp()
-            
+
             with Session(engine) as session:
                 statement = select(CompiledFormData).where(
                     CompiledFormData.youth_id == youth_id,
                     CompiledFormData.task_id == task_id,
                     CompiledFormData.timestamp >= today_start_timestamp,
-                    CompiledFormData.timestamp < tomorrow_start_timestamp
+                    CompiledFormData.timestamp < tomorrow_start_timestamp,
                 )
                 result = session.exec(statement).first()
                 return result is not None
-        
+
         result = handle_database_operation(
-            _check_operation,
-            "verificação de entrada existente no dia"
+            _check_operation, "verificação de entrada existente no dia"
         )
         return result if result is not None else False
 
@@ -218,12 +212,12 @@ class CompiledFormDataRepository:
                     session.commit()
                     return True
                 return False
-        
+
         result = handle_database_operation(
-            _delete_operation,
-            "exclusão do registro de tarefa"
+            _delete_operation, "exclusão do registro de tarefa"
         )
         return result if result is not None else False
+
 
 # Connection strings
 SQLITE_URL = default_db_path
@@ -239,7 +233,9 @@ try:
 except Exception as e:
     # If PostgreSQL connection fails, fallback to SQLite
     if POSTGRES_URL:
-        print(f"Warning: PostgreSQL connection failed ({str(e)}), falling back to SQLite")
+        print(
+            f"Warning: PostgreSQL connection failed ({str(e)}), falling back to SQLite"
+        )
         try:
             engine = create_engine(SQLITE_URL)
             SQLModel.metadata.create_all(engine)
