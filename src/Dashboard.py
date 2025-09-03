@@ -70,7 +70,48 @@ def calculate_weekly_youth_points():
     last_sunday = get_last_sunday()
     sunday_timestamp = last_sunday.timestamp()
     
-    # Calculate weekly points for each youth
+    # Calculate current total points for each youth (all time)
+    current_total_points = {}
+    for youth in youth_entries:
+        current_total_points[youth.id] = {
+            'name': youth.name,
+            'organization': youth.organization,
+            'points': youth.total_points
+        }
+    
+    # Calculate total points as of last Saturday (excluding this week's entries)
+    last_saturday_points = {}
+    for youth in youth_entries:
+        last_saturday_points[youth.id] = {
+            'name': youth.name,
+            'organization': youth.organization,
+            'points': 0
+        }
+    
+    # Add up all points except those from this week (Sunday onwards)
+    for entry in compiled_entries:
+        if entry.timestamp < sunday_timestamp:  # Before this week
+            task = task_dict.get(entry.task_id)
+            youth = youth_dict.get(entry.youth_id)
+            if task and youth:
+                points = task.points * entry.quantity + entry.bonus
+                last_saturday_points[youth.id]['points'] += points
+    
+    # Create ranking for current totals (position 1 = highest points)
+    current_ranking = sorted(
+        [(youth_id, data['points']) for youth_id, data in current_total_points.items() if data['points'] > 0],
+        key=lambda x: x[1], reverse=True
+    )
+    current_positions = {youth_id: idx + 1 for idx, (youth_id, _) in enumerate(current_ranking)}
+    
+    # Create ranking for last Saturday (position 1 = highest points)
+    last_saturday_ranking = sorted(
+        [(youth_id, data['points']) for youth_id, data in last_saturday_points.items() if data['points'] > 0],
+        key=lambda x: x[1], reverse=True
+    )
+    last_saturday_positions = {youth_id: idx + 1 for idx, (youth_id, _) in enumerate(last_saturday_ranking)}
+    
+    # Calculate weekly points and position changes
     weekly_points = {}
     for entry in compiled_entries:
         if entry.timestamp >= sunday_timestamp:  # This week
@@ -79,10 +120,21 @@ def calculate_weekly_youth_points():
             if task and youth:
                 points = task.points * entry.quantity + entry.bonus
                 if youth.id not in weekly_points:
+                    current_pos = current_positions.get(youth.id, 0)
+                    last_saturday_pos = last_saturday_positions.get(youth.id, 0)
+                    
+                    # Calculate delta: negative means moved up (better position)
+                    # If youth wasn't ranked last Saturday, consider them as having moved up
+                    if last_saturday_pos == 0:
+                        delta = -(current_pos - len(last_saturday_positions) - 1) if current_pos > 0 else 0
+                    else:
+                        delta = last_saturday_pos - current_pos
+                    
                     weekly_points[youth.id] = {
                         'name': youth.name,
                         'organization': youth.organization,
-                        'points': 0
+                        'points': 0,
+                        'delta': delta
                     }
                 weekly_points[youth.id]['points'] += points
     
@@ -180,17 +232,22 @@ if sorted_youth:
     # Create Top 5 based on total ranking but show weekly points
     top_5_youth = sorted_youth[:5]
     
-    if top_5_youth:
+    # Check if any of the top 5 have weekly points
+    has_weekly_activity = any(weekly_points_data.get(youth.id, {}).get('points', 0) > 0 for youth in top_5_youth)
+    
+    if top_5_youth and has_weekly_activity:
         # Display in a single row using columns
         cols = st.columns(5)
         
         for idx, youth in enumerate(top_5_youth):
             weekly_points = weekly_points_data.get(youth.id, {}).get('points', 0)
+            position_delta = weekly_points_data.get(youth.id, {}).get('delta', 0)
             
             with cols[idx]:
                 st.metric(
-                    label=f"#{idx + 1} {youth.name} ({youth.organization})",
-                    value=f"{weekly_points} pts"
+                    label=f"#{idx + 1} {youth.name}",
+                    value=f"{weekly_points} pts",
+                    delta=f"{position_delta} posição"
                 )
     else:
         st.info("Nenhuma pontuação desta semana ainda.")
