@@ -15,7 +15,8 @@ def check_password():
 
     if auth_password is None:
         st.error(
-            "Autenticação não configurada. Por favor, defina a variável de ambiente AUTH."
+            "Autenticação não configurada. Por favor, defina a "
+            "variável de ambiente AUTH."
         )
         return False
 
@@ -81,7 +82,8 @@ def handle_database_operation[T](
         st.info(f"""
         🔄 **Problema temporário com o banco de dados**
 
-        Houve uma dificuldade ao executar a {operation_name}. Isso pode acontecer ocasionalmente devido a:
+        Houve uma dificuldade ao executar a {operation_name}. Isso pode
+        acontecer ocasionalmente devido a:
         - Tempo limite de conexão
         - Sobrecarga temporária do banco
         - Problemas de rede

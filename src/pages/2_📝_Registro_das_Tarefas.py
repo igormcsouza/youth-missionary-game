@@ -108,7 +108,8 @@ with st.form("compiled_form"):
                 )
                 if update_result is not None:
                     st.success(
-                        "Entrada registrada e pontuação total do jovem atualizada!"
+                        "Entrada registrada e pontuação total "
+                        "do jovem atualizada!"
                     )
                     st.rerun()  # Refresh the page to show updated entries
             # Error messages are handled by the repository methods

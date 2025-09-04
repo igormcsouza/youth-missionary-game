@@ -154,7 +154,7 @@ def calculate_weekly_youth_points():
                         youth.id, 0
                     )
 
-                    # Calculate delta: negative means moved up (better position)
+                    # Calculate delta: negative means moved up (good)
                     # If youth wasn't ranked last Saturday, consider them as
                     # having moved up
                     if last_saturday_pos == 0:
@@ -179,7 +179,8 @@ def calculate_weekly_youth_points():
 
 # Calculate weekly "Livros de Mórmon" deliveries
 def calculate_weekly_book_deliveries():
-    """Calculate weekly deliveries of 'Livros de Mórmon' since competition start"""
+    """Calculate weekly deliveries of 'Livros de Mórmon'
+    since competition start"""
     compiled_entries = CompiledFormDataRepository.get_all()
     task_entries = TasksFormDataRepository.get_all()
 
