@@ -1,5 +1,5 @@
-# Example pre-commit configuration
-# To use: pip install pre-commit && pre-commit install
+# Pre-commit configuration for all developers
+# Installation: poetry run pre-commit install
 
 repos:
   - repo: https://github.com/astral-sh/ruff-pre-commit

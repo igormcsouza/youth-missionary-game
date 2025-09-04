@@ -30,16 +30,24 @@ def check_password():
     # First run: ask for password
     if "password_correct" not in st.session_state:
         st.text_input(
-            "Senha", type="password", on_change=password_entered, key="password"
+            "Senha",
+            type="password",
+            on_change=password_entered,
+            key="password",
         )
         return False
 
     # Wrong password
     elif not st.session_state["password_correct"]:
         st.text_input(
-            "Senha", type="password", on_change=password_entered, key="password"
+            "Senha",
+            type="password",
+            on_change=password_entered,
+            key="password",
         )
-        st.error("❌ Senha incorreta. Entre em contato para obter uma nova senha!")
+        st.error(
+            "❌ Senha incorreta. Entre em contato para obter uma nova senha!"
+        )
         return False
 
     # Correct password
@@ -48,7 +56,8 @@ def check_password():
 
 
 def handle_database_operation[T](
-    operation: Callable[[], T], operation_name: str = "operação do banco de dados"
+    operation: Callable[[], T],
+    operation_name: str = "operação do banco de dados",
 ) -> T | None:
     """
     Handles database operations with user-friendly error messages.
@@ -64,7 +73,9 @@ def handle_database_operation[T](
         return operation()
     except Exception as e:
         # Log the actual error for debugging
-        logging.error(f"Database operation '{operation_name}' failed: {str(e)}")
+        logging.error(
+            f"Database operation '{operation_name}' failed: {str(e)}"
+        )
 
         # Show user-friendly message
         st.info(f"""

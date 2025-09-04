@@ -121,13 +121,17 @@ class TestHandleDatabaseOperation:
         def successful_operation():
             return "success"
 
-        result = handle_database_operation(successful_operation, "test operation")
+        result = handle_database_operation(
+            successful_operation, "test operation"
+        )
 
         assert result == "success"
 
     @patch("streamlit.info")
     @patch("logging.error")
-    def test_handle_database_operation_failure(self, mock_log_error, mock_st_info):
+    def test_handle_database_operation_failure(
+        self, mock_log_error, mock_st_info
+    ):
         """Test failed database operation"""
 
         def failing_operation():
@@ -148,7 +152,9 @@ class TestHandleDatabaseOperation:
 
     @patch("streamlit.info")
     @patch("logging.error")
-    def test_handle_database_operation_default_name(self, mock_log_error, mock_st_info):
+    def test_handle_database_operation_default_name(
+        self, mock_log_error, mock_st_info
+    ):
         """Test database operation with default operation name"""
 
         def failing_operation():
@@ -168,7 +174,9 @@ class TestHandleDatabaseOperation:
         def operation_with_object():
             return {"id": 1, "name": "test", "data": [1, 2, 3]}
 
-        result = handle_database_operation(operation_with_object, "complex operation")
+        result = handle_database_operation(
+            operation_with_object, "complex operation"
+        )
 
         assert result == {"id": 1, "name": "test", "data": [1, 2, 3]}
 
@@ -178,7 +186,9 @@ class TestHandleDatabaseOperation:
         def operation_returning_none():
             return None
 
-        result = handle_database_operation(operation_returning_none, "none operation")
+        result = handle_database_operation(
+            operation_returning_none, "none operation"
+        )
 
         assert result is None
 
@@ -200,7 +210,9 @@ class TestHandleDatabaseOperation:
             def failing_operation():
                 raise exception
 
-            result = handle_database_operation(failing_operation, "exception test")
+            result = handle_database_operation(
+                failing_operation, "exception test"
+            )
 
             assert result is None
 
@@ -219,7 +231,9 @@ class TestHandleDatabaseOperation:
         def failing_operation():
             raise Exception("Test error")
 
-        result = handle_database_operation(failing_operation, long_operation_name)
+        result = handle_database_operation(
+            failing_operation, long_operation_name
+        )
 
         assert result is None
         mock_log_error.assert_called_once()
@@ -284,7 +298,9 @@ class TestUtilsModuleIntegration:
             def inner_operation():
                 raise Exception("Inner operation failed")
 
-            return handle_database_operation(inner_operation, "inner operation")
+            return handle_database_operation(
+                inner_operation, "inner operation"
+            )
 
         result = handle_database_operation(outer_operation, "outer operation")
 

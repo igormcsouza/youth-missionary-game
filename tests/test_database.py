@@ -42,7 +42,9 @@ class TestTasksFormData:
 
     def test_tasks_form_data_creation(self):
         """Test creating a TasksFormData instance"""
-        task = TasksFormData(tasks="Ler scriptures", points=10, repeatable=True)
+        task = TasksFormData(
+            tasks="Ler scriptures", points=10, repeatable=True
+        )
 
         assert task.tasks == "Ler scriptures"
         assert task.points == 10
@@ -340,7 +342,9 @@ class TestDatabaseConnection:
 
     def test_database_url_postgres_configured(self):
         """Test database URL selection when PostgreSQL is configured"""
-        with patch.dict(os.environ, {"POSTGRESCONNECTIONSTRING": "postgresql://test"}):
+        with patch.dict(
+            os.environ, {"POSTGRESCONNECTIONSTRING": "postgresql://test"}
+        ):
             # Test the environment variable logic directly
             postgres_url = os.getenv("POSTGRESCONNECTIONSTRING", "")
             sqlite_url = "sqlite:///youth_data.db"

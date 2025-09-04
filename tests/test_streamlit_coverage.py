@@ -177,14 +177,24 @@ class TestRegistroTarefasPageComprehensive:
         mock_compiled.bonus = 0
 
         with patch("utils.check_password", return_value=True):
-            with patch("database.YouthFormDataRepository.get_all", return_value=[]):
-                with patch("database.TasksFormDataRepository.get_all", return_value=[]):
+            with patch(
+                "database.YouthFormDataRepository.get_all", return_value=[]
+            ):
+                with patch(
+                    "database.TasksFormDataRepository.get_all", return_value=[]
+                ):
                     with patch(
                         "database.CompiledFormDataRepository.get_all",
                         return_value=[mock_compiled],
                     ):
-                        os.chdir(os.path.join(os.path.dirname(__file__), "..", "src"))
-                        at = AppTest.from_file("pages/2_📝_Registro_das_Tarefas.py")
+                        os.chdir(
+                            os.path.join(
+                                os.path.dirname(__file__), "..", "src"
+                            )
+                        )
+                        at = AppTest.from_file(
+                            "pages/2_📝_Registro_das_Tarefas.py"
+                        )
                         at.run()
 
                         # Should handle missing references gracefully
@@ -207,7 +217,8 @@ class TestRegistroTarefasPageComprehensive:
 
         with patch("utils.check_password", return_value=True):
             with patch(
-                "database.YouthFormDataRepository.get_all", return_value=[mock_youth]
+                "database.YouthFormDataRepository.get_all",
+                return_value=[mock_youth],
             ):
                 with patch(
                     "database.TasksFormDataRepository.get_all", return_value=[]
@@ -216,8 +227,14 @@ class TestRegistroTarefasPageComprehensive:
                         "database.CompiledFormDataRepository.get_all",
                         return_value=[mock_compiled],
                     ):
-                        os.chdir(os.path.join(os.path.dirname(__file__), "..", "src"))
-                        at = AppTest.from_file("pages/2_📝_Registro_das_Tarefas.py")
+                        os.chdir(
+                            os.path.join(
+                                os.path.dirname(__file__), "..", "src"
+                            )
+                        )
+                        at = AppTest.from_file(
+                            "pages/2_📝_Registro_das_Tarefas.py"
+                        )
                         at.run()
 
                         # Should handle missing task gracefully and calculate 0 points
@@ -262,7 +279,8 @@ class TestEdgeCasesAndErrorHandling:
 
         with patch("utils.check_password", return_value=True):
             with patch(
-                "database.YouthFormDataRepository.get_all", return_value=[mock_youth]
+                "database.YouthFormDataRepository.get_all",
+                return_value=[mock_youth],
             ):
                 os.chdir(os.path.join(os.path.dirname(__file__), "..", "src"))
                 at = AppTest.from_file("pages/1_📁_Dados_da_Gincana.py")
@@ -287,7 +305,8 @@ class TestDataFrameCreationLogic:
 
         with patch("utils.check_password", return_value=True):
             with patch(
-                "database.YouthFormDataRepository.get_all", return_value=[mock_youth]
+                "database.YouthFormDataRepository.get_all",
+                return_value=[mock_youth],
             ):
                 os.chdir(os.path.join(os.path.dirname(__file__), "..", "src"))
                 at = AppTest.from_file("pages/1_📁_Dados_da_Gincana.py")
@@ -301,13 +320,16 @@ class TestDataFrameCreationLogic:
         """Test tasks DataFrame creation with edge case data"""
         # Mock task with edge case data
         mock_task = MagicMock()
-        mock_task.tasks = "Very Long Task Name That Might Cause Issues In Display"
+        mock_task.tasks = (
+            "Very Long Task Name That Might Cause Issues In Display"
+        )
         mock_task.points = 0  # Edge case: zero points
         mock_task.repeatable = False
 
         with patch("utils.check_password", return_value=True):
             with patch(
-                "database.TasksFormDataRepository.get_all", return_value=[mock_task]
+                "database.TasksFormDataRepository.get_all",
+                return_value=[mock_task],
             ):
                 os.chdir(os.path.join(os.path.dirname(__file__), "..", "src"))
                 at = AppTest.from_file("pages/1_📁_Dados_da_Gincana.py")

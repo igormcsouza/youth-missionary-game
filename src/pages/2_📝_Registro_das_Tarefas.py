@@ -27,7 +27,13 @@ def refresh_youth_and_task_entries():
     youth_options = {y.id: y.name for y in youth_entries}
     youth_org_options = {y.id: y.organization for y in youth_entries}
     task_options = {t.id: t.tasks for t in task_entries}
-    return youth_entries, task_entries, youth_options, youth_org_options, task_options
+    return (
+        youth_entries,
+        task_entries,
+        youth_options,
+        youth_org_options,
+        task_options,
+    )
 
 
 youth_entries, task_entries, youth_options, youth_org_options, task_options = (
@@ -36,7 +42,8 @@ youth_entries, task_entries, youth_options, youth_org_options, task_options = (
 task_by_id = {t.id: t for t in task_entries}
 
 with st.form("compiled_form"):
-    # Get selected task to determine if it's repeatable (outside form for reactivity)
+    # Get selected task to determine if it's repeatable
+    # (outside form for reactivity)
     selected_youth_id = st.selectbox(
         "Selecionar Jovem",
         options=list(youth_options.keys()),
@@ -49,7 +56,9 @@ with st.form("compiled_form"):
     )
 
     # Check if selected task is repeatable and show appropriate UI
-    selected_task = task_by_id.get(selected_task_id) if selected_task_id else None
+    selected_task = (
+        task_by_id.get(selected_task_id) if selected_task_id else None
+    )
     is_repeatable = selected_task.repeatable if selected_task else True
 
     quantity = st.number_input("Quantidade", min_value=1, step=1)
@@ -65,12 +74,14 @@ with st.form("compiled_form"):
         # Check if there's already an entry today for this youth and task
         if not is_repeatable and has_entry_today:
             st.error(
-                "❌ Esta tarefa não é repetível e já foi registrada hoje para este jovem. Apenas uma entrada por semana é permitida."
+                "❌ Esta tarefa não é repetível e já foi registrada hoje "
+                "para este jovem. Apenas uma entrada por semana é permitida."
             )
         # Check if the task is not repeatable but the quantity is more than 1
         elif not is_repeatable and quantity > 1:
             st.error(
-                "❌ Esta tarefa não é repetível. Apenas uma entrada por semana é permitida."
+                "❌ Esta tarefa não é repetível. "
+                "Apenas uma entrada por semana é permitida."
             )
         else:
             # For repeatable tasks, proceed normally
@@ -89,7 +100,9 @@ with st.form("compiled_form"):
                     if entry.youth_id == selected_youth_id:
                         task = task_by_id.get(entry.task_id)
                         if task:
-                            total_points += task.points * entry.quantity + entry.bonus
+                            total_points += (
+                                task.points * entry.quantity + entry.bonus
+                            )
                 update_result = YouthFormDataRepository.update_total_points(
                     selected_youth_id, total_points
                 )
@@ -121,11 +134,17 @@ if compiled_entries:
                 "Jovem": get_name_by_id(e.youth_id),
                 "Organização": get_organization_by_id(e.youth_id),
                 "Tarefa": get_task_by_id(e.task_id),
-                "Data": datetime.fromtimestamp(e.timestamp).strftime("%d/%m/%Y"),
+                "Data": datetime.fromtimestamp(e.timestamp).strftime(
+                    "%d/%m/%Y"
+                ),
                 "Quantidade": e.quantity,
                 "Bônus": e.bonus,
                 "Pontuação Total": e.quantity
-                * (task_by_id.get(e.task_id).points if task_by_id.get(e.task_id) else 0)
+                * (
+                    task_by_id.get(e.task_id).points
+                    if task_by_id.get(e.task_id)
+                    else 0
+                )
                 + e.bonus,  # type: ignore
             }
             for e in compiled_entries

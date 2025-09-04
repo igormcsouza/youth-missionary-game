@@ -30,17 +30,22 @@ A Streamlit-based web application for managing youth missionary competitions. Th
    poetry install
    ```
 
-3. **Set up authentication (optional for development):**
+3. **Set up pre-commit hooks (recommended for all developers):**
+   ```bash
+   poetry run pre-commit install
+   ```
+
+4. **Set up authentication (optional for development):**
    ```bash
    export AUTH="your-password-here"
    ```
 
-4. **Run the application:**
+5. **Run the application:**
    ```bash
    poetry run streamlit run src/Dashboard.py
    ```
 
-5. **Open your browser and navigate to:** `http://localhost:8501`
+6. **Open your browser and navigate to:** `http://localhost:8501`
 
 ## Development Setup
 
@@ -73,6 +78,26 @@ The application follows a standard Streamlit multi-page structure:
 - `src/pages/2_📝_Registro_das_Tarefas.py` - Task completion tracking
 - `src/database.py` - Database models and repositories
 - `src/utils.py` - Utility functions including authentication
+
+### Code Quality
+
+This project uses modern Python tooling for code quality:
+
+- **Ruff** - Fast Python linter and formatter
+- **Pre-commit hooks** - Automatic code quality checks before commits
+- **pytest** - Comprehensive testing with 87% coverage
+
+Run code quality checks manually:
+```bash
+# Format code with Ruff
+poetry run ruff format
+
+# Lint code with Ruff
+poetry run ruff check --fix
+
+# Run tests with coverage
+poetry run pytest
+```
 
 ## Deployment
 

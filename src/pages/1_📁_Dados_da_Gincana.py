@@ -49,9 +49,13 @@ with col2:
                 if entry.youth_id == youth.id:
                     task = task_by_id.get(entry.task_id)
                     if task:
-                        total_points += task.points * entry.quantity + entry.bonus
+                        total_points += (
+                            task.points * entry.quantity + entry.bonus
+                        )
             if youth.id:
-                YouthFormDataRepository.update_total_points(youth.id, total_points)
+                YouthFormDataRepository.update_total_points(
+                    youth.id, total_points
+                )
         st.rerun()
 entries = YouthFormDataRepository.get_all()
 if entries:

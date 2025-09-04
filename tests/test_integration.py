@@ -36,7 +36,10 @@ class TestCompleteWorkflow:
         with patch("database.engine", self.test_engine):
             # Step 1: Add a youth
             youth = YouthFormDataRepository.store(
-                name="João Silva", age=16, organization="Rapazes", total_points=0
+                name="João Silva",
+                age=16,
+                organization="Rapazes",
+                total_points=0,
             )
 
             assert youth is not None
@@ -78,7 +81,9 @@ class TestCompleteWorkflow:
                 if entry.youth_id == youth.id:
                     task_obj = task_by_id.get(entry.task_id)
                     if task_obj:
-                        total_points += task_obj.points * entry.quantity + entry.bonus
+                        total_points += (
+                            task_obj.points * entry.quantity + entry.bonus
+                        )
 
             # Update youth total points
             YouthFormDataRepository.update_total_points(youth.id, total_points)
@@ -133,7 +138,9 @@ class TestCompleteWorkflow:
                             total_points += (
                                 task_obj.points * entry.quantity + entry.bonus
                             )
-                YouthFormDataRepository.update_total_points(youth.id, total_points)
+                YouthFormDataRepository.update_total_points(
+                    youth.id, total_points
+                )
 
             # Verify results
             all_youth = YouthFormDataRepository.get_all()
@@ -163,7 +170,9 @@ class TestCompleteWorkflow:
             assert entry1 is not None
 
             # Check if entry exists today
-            has_entry = CompiledFormDataRepository.has_entry_today(youth.id, task.id)
+            has_entry = CompiledFormDataRepository.has_entry_today(
+                youth.id, task.id
+            )
             assert has_entry is True
 
             # Simulate validation logic from page
@@ -271,7 +280,9 @@ class TestDashboardDataIntegration:
             deltas = dict.fromkeys(target_tasks.values(), 0)
 
             # Calculate Monday after last Sunday timestamp
-            last_sunday = current_time - dt.timedelta(days=current_time.weekday() + 1)
+            last_sunday = current_time - dt.timedelta(
+                days=current_time.weekday() + 1
+            )
             monday_after = last_sunday + dt.timedelta(days=1)
             monday_timestamp = monday_after.timestamp()
 
@@ -290,7 +301,9 @@ class TestDashboardDataIntegration:
             assert totals["Batismos"] == 1
 
             # Deltas should only count this week's activities
-            assert deltas["Livros de Mórmon entregues"] == 1  # Only this week's entry
+            assert (
+                deltas["Livros de Mórmon entregues"] == 1
+            )  # Only this week's entry
             assert deltas["Pessoas levadas à igreja"] == 3
             assert deltas["Batismos"] == 1
 
@@ -347,10 +360,14 @@ class TestDashboardDataIntegration:
             # Apply dashboard organization calculation
             youth_entries = YouthFormDataRepository.get_all()
             young_man_points = sum(
-                y.total_points for y in youth_entries if y.organization == "Rapazes"
+                y.total_points
+                for y in youth_entries
+                if y.organization == "Rapazes"
             )
             young_woman_points = sum(
-                y.total_points for y in youth_entries if y.organization == "Moças"
+                y.total_points
+                for y in youth_entries
+                if y.organization == "Moças"
             )
 
             assert young_man_points == 150  # 100 + 50
@@ -364,7 +381,9 @@ class TestDashboardDataIntegration:
             task2 = TasksFormDataRepository.store("Task 2", 20, True)
             task3 = TasksFormDataRepository.store("Task 3", 5, True)
 
-            youth = YouthFormDataRepository.store("Test Youth", 16, "Rapazes", 0)
+            youth = YouthFormDataRepository.store(
+                "Test Youth", 16, "Rapazes", 0
+            )
 
             # Record task completions
             timestamp = time.time()
@@ -391,7 +410,9 @@ class TestDashboardDataIntegration:
                 task = task_dict.get(entry.task_id)
                 if task:
                     points = task.points * entry.quantity + entry.bonus
-                    task_points[task.tasks] = task_points.get(task.tasks, 0) + points
+                    task_points[task.tasks] = (
+                        task_points.get(task.tasks, 0) + points
+                    )
 
             # Verify task points calculation
             assert task_points["Task 1"] == 35  # 25 + 10
@@ -424,7 +445,9 @@ class TestErrorHandlingIntegration:
                 mock_handler.return_value = None
 
                 # This should return None due to mock
-                result = YouthFormDataRepository.store("Test2", 16, "Rapazes", 0)
+                result = YouthFormDataRepository.store(
+                    "Test2", 16, "Rapazes", 0
+                )
                 assert result is None
 
                 # get_all should return empty list on error
@@ -439,7 +462,9 @@ class TestErrorHandlingIntegration:
             task = TasksFormDataRepository.store("Test Task", 10, True)
 
             # Add compiled entry
-            CompiledFormDataRepository.store(youth.id, task.id, time.time(), 1, 0)
+            CompiledFormDataRepository.store(
+                youth.id, task.id, time.time(), 1, 0
+            )
 
             # Delete the task (simulating missing foreign key)
             TasksFormDataRepository.delete(task.id)
@@ -453,7 +478,9 @@ class TestErrorHandlingIntegration:
                 if entry.youth_id == youth.id:
                     task_obj = task_by_id.get(entry.task_id)
                     if task_obj:  # This should be None now
-                        total_points += task_obj.points * entry.quantity + entry.bonus
+                        total_points += (
+                            task_obj.points * entry.quantity + entry.bonus
+                        )
 
             # Should be 0 since task was deleted
             assert total_points == 0
@@ -467,11 +494,15 @@ class TestErrorHandlingIntegration:
             )  # Empty name, age 0
             assert youth is not None  # Database should accept this
 
-            task = TasksFormDataRepository.store("", 0, False)  # Empty task, 0 points
+            task = TasksFormDataRepository.store(
+                "", 0, False
+            )  # Empty task, 0 points
             assert task is not None
 
             # Test with very large values
-            large_youth = YouthFormDataRepository.store("X" * 100, 120, "Moças", 999999)
+            large_youth = YouthFormDataRepository.store(
+                "X" * 100, 120, "Moças", 999999
+            )
             assert large_youth is not None
 
             large_task = TasksFormDataRepository.store("Y" * 200, 999999, True)
@@ -539,8 +570,12 @@ class TestPerformanceIntegration:
                     if entry.youth_id == youth.id:
                         task = task_by_id.get(entry.task_id)
                         if task:
-                            total_points += task.points * entry.quantity + entry.bonus
-                YouthFormDataRepository.update_total_points(youth.id, total_points)
+                            total_points += (
+                                task.points * entry.quantity + entry.bonus
+                            )
+                YouthFormDataRepository.update_total_points(
+                    youth.id, total_points
+                )
 
             # Verify final state
             updated_youth = YouthFormDataRepository.get_all()

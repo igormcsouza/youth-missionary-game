@@ -2,7 +2,7 @@
 name = "youth-missionary-game"
 version = "0.0.0"
 description = "A Streamlit-based web application for managing youth missionary competitions"
-authors = ["Igor M. C. Souza"]
+authors = ["Igor Souza"]
 license = "MIT"
 readme = "README.md"
 packages = [{include = "src"}]
@@ -20,13 +20,14 @@ pytest-cov = "*"
 pytest-mock = "*"
 freezegun = "*"
 ruff = "*"
+pre-commit = "*"
 
 [build-system]
 requires = ["poetry-core"]
 build-backend = "poetry.core.masonry.api"
 
 [tool.ruff]
-line-length = 88
+line-length = 79
 target-version = "py312"
 
 [tool.ruff.lint]
@@ -39,9 +40,7 @@ select = [
     "C4", # flake8-comprehensions
     "UP", # pyupgrade
 ]
-ignore = [
-    "E501", # line too long, handled by formatter
-]
+ignore = []
 
 [tool.ruff.format]
 quote-style = "double"

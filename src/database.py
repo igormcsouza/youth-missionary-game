@@ -42,7 +42,10 @@ class YouthFormDataRepository:
     ) -> YouthFormData | None:
         def _store_operation():
             entry = YouthFormData(
-                name=name, age=age, organization=organization, total_points=total_points
+                name=name,
+                age=age,
+                organization=organization,
+                total_points=total_points,
             )
             with Session(engine) as session:
                 session.add(entry)
@@ -76,7 +79,9 @@ class YouthFormDataRepository:
                     return True
                 return False
 
-        result = handle_database_operation(_delete_operation, "exclusão do jovem")
+        result = handle_database_operation(
+            _delete_operation, "exclusão do jovem"
+        )
         return result if result is not None else False
 
 
@@ -90,16 +95,22 @@ class TasksFormData(SQLModel, table=True):
 
 class TasksFormDataRepository:
     @staticmethod
-    def store(tasks: str, points: int, repeatable: bool) -> TasksFormData | None:
+    def store(
+        tasks: str, points: int, repeatable: bool
+    ) -> TasksFormData | None:
         def _store_operation():
-            entry = TasksFormData(tasks=tasks, points=points, repeatable=repeatable)
+            entry = TasksFormData(
+                tasks=tasks, points=points, repeatable=repeatable
+            )
             with Session(engine) as session:
                 session.add(entry)
                 session.commit()
                 session.refresh(entry)
             return entry
 
-        return handle_database_operation(_store_operation, "cadastro da tarefa")
+        return handle_database_operation(
+            _store_operation, "cadastro da tarefa"
+        )
 
     @staticmethod
     def get_all() -> Sequence[TasksFormData]:
@@ -125,7 +136,9 @@ class TasksFormDataRepository:
                     return True
                 return False
 
-        result = handle_database_operation(_delete_operation, "exclusão da tarefa")
+        result = handle_database_operation(
+            _delete_operation, "exclusão da tarefa"
+        )
         return result if result is not None else False
 
 
@@ -142,7 +155,11 @@ class CompiledFormData(SQLModel, table=True):
 class CompiledFormDataRepository:
     @staticmethod
     def store(
-        youth_id: int, task_id: int, timestamp: float, quantity: int, bonus: int
+        youth_id: int,
+        task_id: int,
+        timestamp: float,
+        quantity: int,
+        bonus: int,
     ) -> CompiledFormData | None:
         def _store_operation():
             entry = CompiledFormData(
@@ -177,7 +194,8 @@ class CompiledFormDataRepository:
 
     @staticmethod
     def has_entry_today(youth_id: int, task_id: int) -> bool:
-        """Check if there's already an entry for the same youth and task on the same day"""
+        """Check if there's already an entry for the same youth and task
+        on the same day"""
 
         def _check_operation():
             today = dt.date.today()
@@ -234,18 +252,24 @@ except Exception as e:
     # If PostgreSQL connection fails, fallback to SQLite
     if POSTGRES_URL:
         print(
-            f"Warning: PostgreSQL connection failed ({str(e)}), falling back to SQLite"
+            f"Warning: PostgreSQL connection failed ({str(e)}), "
+            f"falling back to SQLite"
         )
         try:
             engine = create_engine(SQLITE_URL)
             SQLModel.metadata.create_all(engine)
         except Exception as sqlite_error:
-            print(f"Critical: SQLite fallback also failed ({str(sqlite_error)})")
+            print(
+                f"Critical: SQLite fallback also failed ({str(sqlite_error)})"
+            )
             # Create a minimal working engine for error handling
             engine = create_engine("sqlite:///:memory:")
             SQLModel.metadata.create_all(engine)
     else:
-        print(f"Warning: SQLite database issue ({str(e)}), using in-memory database")
+        print(
+            f"Warning: SQLite database issue ({str(e)}), "
+            f"using in-memory database"
+        )
         # Create a minimal working engine for error handling
         engine = create_engine("sqlite:///:memory:")
         SQLModel.metadata.create_all(engine)

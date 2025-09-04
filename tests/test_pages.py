@@ -40,10 +40,18 @@ class TestRegistroTarefasPageStreamlit:
     def test_page_loads_with_auth(self):
         """Test that the page loads when authenticated"""
         with patch("utils.check_password", return_value=True):
-            with patch("database.YouthFormDataRepository.get_all", return_value=[]):
-                with patch("database.TasksFormDataRepository.get_all", return_value=[]):
-                    os.chdir(os.path.join(os.path.dirname(__file__), "..", "src"))
-                    at = AppTest.from_file("pages/2_📝_Registro_das_Tarefas.py")
+            with patch(
+                "database.YouthFormDataRepository.get_all", return_value=[]
+            ):
+                with patch(
+                    "database.TasksFormDataRepository.get_all", return_value=[]
+                ):
+                    os.chdir(
+                        os.path.join(os.path.dirname(__file__), "..", "src")
+                    )
+                    at = AppTest.from_file(
+                        "pages/2_📝_Registro_das_Tarefas.py"
+                    )
                     at.run()
                     assert not at.exception
 
@@ -61,10 +69,18 @@ class TestRegistroTarefasPageStreamlit:
     def test_page_title_displayed(self):
         """Test that the page title is displayed"""
         with patch("utils.check_password", return_value=True):
-            with patch("database.YouthFormDataRepository.get_all", return_value=[]):
-                with patch("database.TasksFormDataRepository.get_all", return_value=[]):
-                    os.chdir(os.path.join(os.path.dirname(__file__), "..", "src"))
-                    at = AppTest.from_file("pages/2_📝_Registro_das_Tarefas.py")
+            with patch(
+                "database.YouthFormDataRepository.get_all", return_value=[]
+            ):
+                with patch(
+                    "database.TasksFormDataRepository.get_all", return_value=[]
+                ):
+                    os.chdir(
+                        os.path.join(os.path.dirname(__file__), "..", "src")
+                    )
+                    at = AppTest.from_file(
+                        "pages/2_📝_Registro_das_Tarefas.py"
+                    )
                     at.run()
                     # Check if any title exists
                     assert len(at.title) > 0 or len(at.markdown) > 0
@@ -91,17 +107,25 @@ class TestRegistroTarefasPageStreamlit:
 
         with patch("utils.check_password", return_value=True):
             with patch(
-                "database.YouthFormDataRepository.get_all", return_value=[mock_youth]
+                "database.YouthFormDataRepository.get_all",
+                return_value=[mock_youth],
             ):
                 with patch(
-                    "database.TasksFormDataRepository.get_all", return_value=[mock_task]
+                    "database.TasksFormDataRepository.get_all",
+                    return_value=[mock_task],
                 ):
                     with patch(
                         "database.CompiledFormDataRepository.get_all",
                         return_value=[mock_compiled],
                     ):
-                        os.chdir(os.path.join(os.path.dirname(__file__), "..", "src"))
-                        at = AppTest.from_file("pages/2_📝_Registro_das_Tarefas.py")
+                        os.chdir(
+                            os.path.join(
+                                os.path.dirname(__file__), "..", "src"
+                            )
+                        )
+                        at = AppTest.from_file(
+                            "pages/2_📝_Registro_das_Tarefas.py"
+                        )
                         at.run()
 
                         # Should display the compiled entries DataFrame
@@ -111,13 +135,24 @@ class TestRegistroTarefasPageStreamlit:
     def test_compiled_entries_display_empty(self):
         """Test display of compiled entries when no data exists"""
         with patch("utils.check_password", return_value=True):
-            with patch("database.YouthFormDataRepository.get_all", return_value=[]):
-                with patch("database.TasksFormDataRepository.get_all", return_value=[]):
+            with patch(
+                "database.YouthFormDataRepository.get_all", return_value=[]
+            ):
+                with patch(
+                    "database.TasksFormDataRepository.get_all", return_value=[]
+                ):
                     with patch(
-                        "database.CompiledFormDataRepository.get_all", return_value=[]
+                        "database.CompiledFormDataRepository.get_all",
+                        return_value=[],
                     ):
-                        os.chdir(os.path.join(os.path.dirname(__file__), "..", "src"))
-                        at = AppTest.from_file("pages/2_📝_Registro_das_Tarefas.py")
+                        os.chdir(
+                            os.path.join(
+                                os.path.dirname(__file__), "..", "src"
+                            )
+                        )
+                        at = AppTest.from_file(
+                            "pages/2_📝_Registro_das_Tarefas.py"
+                        )
                         at.run()
 
                         # Should display the empty state message
@@ -131,9 +166,15 @@ class TestDadosGincanaPage:
         """Test the points calculation logic from the page"""
         # Mock data similar to what's in the page
         mock_compiled_entries = [
-            MagicMock(youth_id=1, task_id=1, quantity=2, bonus=5),  # 10*2 + 5 = 25
-            MagicMock(youth_id=1, task_id=2, quantity=1, bonus=0),  # 20*1 + 0 = 20
-            MagicMock(youth_id=2, task_id=1, quantity=1, bonus=10),  # 10*1 + 10 = 20
+            MagicMock(
+                youth_id=1, task_id=1, quantity=2, bonus=5
+            ),  # 10*2 + 5 = 25
+            MagicMock(
+                youth_id=1, task_id=2, quantity=1, bonus=0
+            ),  # 20*1 + 0 = 20
+            MagicMock(
+                youth_id=2, task_id=1, quantity=1, bonus=10
+            ),  # 10*1 + 10 = 20
         ]
 
         mock_tasks = [
@@ -156,7 +197,9 @@ class TestDadosGincanaPage:
                 if entry.youth_id == youth.id:
                     task = task_by_id.get(entry.task_id)
                     if task:
-                        total_points += task.points * entry.quantity + entry.bonus
+                        total_points += (
+                            task.points * entry.quantity + entry.bonus
+                        )
             youth_points[youth.id] = total_points
 
         # Verify calculations
@@ -283,21 +326,27 @@ class TestRegistroTarefasPage:
 
         # Test logic from the page for selected task
         selected_task_id = 1
-        selected_task = task_by_id.get(selected_task_id) if selected_task_id else None
+        selected_task = (
+            task_by_id.get(selected_task_id) if selected_task_id else None
+        )
         is_repeatable = selected_task.repeatable if selected_task else True
 
         assert is_repeatable is True
 
         # Test with non-repeatable task
         selected_task_id = 2
-        selected_task = task_by_id.get(selected_task_id) if selected_task_id else None
+        selected_task = (
+            task_by_id.get(selected_task_id) if selected_task_id else None
+        )
         is_repeatable = selected_task.repeatable if selected_task else True
 
         assert is_repeatable is False
 
         # Test with no task selected
         selected_task_id = None
-        selected_task = task_by_id.get(selected_task_id) if selected_task_id else None
+        selected_task = (
+            task_by_id.get(selected_task_id) if selected_task_id else None
+        )
         is_repeatable = selected_task.repeatable if selected_task else True
 
         assert is_repeatable is True  # Default to True when no task selected
@@ -462,7 +511,12 @@ class TestPageDataFrameLogic:
 
         # Verify DataFrame structure
         assert len(df) == 2
-        assert list(df.columns) == ["Nome", "Idade", "Organização", "Pontuação Total"]
+        assert list(df.columns) == [
+            "Nome",
+            "Idade",
+            "Organização",
+            "Pontuação Total",
+        ]
         assert df.iloc[0]["Nome"] == "João"
         assert df.iloc[0]["Idade"] == 16
         assert df.iloc[1]["Nome"] == "Maria"
@@ -566,8 +620,14 @@ class TestOrganizationColumnFeature:
                         "database.CompiledFormDataRepository.get_all",
                         return_value=[mock_compiled1],
                     ):
-                        os.chdir(os.path.join(os.path.dirname(__file__), "..", "src"))
-                        at = AppTest.from_file("pages/2_📝_Registro_das_Tarefas.py")
+                        os.chdir(
+                            os.path.join(
+                                os.path.dirname(__file__), "..", "src"
+                            )
+                        )
+                        at = AppTest.from_file(
+                            "pages/2_📝_Registro_das_Tarefas.py"
+                        )
                         at.run()
 
                         # Verify the app loaded without errors
@@ -628,8 +688,14 @@ class TestOrganizationColumnFeature:
                         "database.CompiledFormDataRepository.get_all",
                         return_value=[mock_compiled1, mock_compiled2],
                     ):
-                        os.chdir(os.path.join(os.path.dirname(__file__), "..", "src"))
-                        at = AppTest.from_file("pages/2_📝_Registro_das_Tarefas.py")
+                        os.chdir(
+                            os.path.join(
+                                os.path.dirname(__file__), "..", "src"
+                            )
+                        )
+                        at = AppTest.from_file(
+                            "pages/2_📝_Registro_das_Tarefas.py"
+                        )
                         at.run()
 
                         # Verify the app loaded without errors
@@ -688,7 +754,10 @@ class TestPageErrorHandling:
 
     def test_task_retrieval_edge_cases(self):
         """Test edge cases in task retrieval"""
-        task_by_id = {1: MagicMock(repeatable=True), 2: MagicMock(repeatable=False)}
+        task_by_id = {
+            1: MagicMock(repeatable=True),
+            2: MagicMock(repeatable=False),
+        }
 
         # Test with valid task ID
         selected_task = task_by_id.get(1)
