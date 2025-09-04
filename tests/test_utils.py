@@ -28,7 +28,8 @@ class TestCheckPassword:
 
         assert result is False
         mock_error.assert_called_once_with(
-            "Autenticação não configurada. Por favor, defina a variável de ambiente AUTH."
+            "Autenticação não configurada. Por favor, defina a variável "
+            "de ambiente AUTH."
         )
 
     @patch.dict(os.environ, {"AUTH": "test_password"})
@@ -164,7 +165,8 @@ class TestHandleDatabaseOperation:
 
         assert result is None
         mock_log_error.assert_called_once_with(
-            "Database operation 'operação do banco de dados' failed: Database error"
+            "Database operation 'operação do banco de dados' failed: "
+            "Database error"
         )
         mock_st_info.assert_called_once()
 
@@ -207,8 +209,8 @@ class TestHandleDatabaseOperation:
 
         for exception in exceptions_to_test:
 
-            def failing_operation():
-                raise exception
+            def failing_operation(exc=exception):
+                raise exc
 
             result = handle_database_operation(
                 failing_operation, "exception test"
@@ -226,7 +228,10 @@ class TestHandleDatabaseOperation:
         self, mock_log_error, mock_st_info
     ):
         """Test database operation with a long operation name"""
-        long_operation_name = "a very long operation name that describes exactly what this operation does in great detail"
+        long_operation_name = (
+            "a very long operation name that describes exactly what this "
+            "operation does in great detail"
+        )
 
         def failing_operation():
             raise Exception("Test error")
@@ -238,7 +243,8 @@ class TestHandleDatabaseOperation:
         assert result is None
         mock_log_error.assert_called_once()
 
-        # Check that the long operation name is included in both log and user message
+        # Check that the long operation name is included in both log
+        # and user message
         log_call_args = mock_log_error.call_args[0][0]
         assert long_operation_name in log_call_args
 

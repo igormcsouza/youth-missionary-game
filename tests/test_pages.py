@@ -352,7 +352,8 @@ class TestRegistroTarefasPage:
         assert is_repeatable is True  # Default to True when no task selected
 
     def test_validation_logic_non_repeatable_with_entry_today(self):
-        """Test validation logic for non-repeatable tasks with existing entry"""
+        """Test validation logic for non-repeatable tasks with
+        existing entry"""
         # Simulate the validation conditions
         is_repeatable = False
         has_entry_today = True
@@ -633,15 +634,19 @@ class TestOrganizationColumnFeature:
                         # Verify the app loaded without errors
                         assert not at.exception
 
-                        # Check that page has dataframe content (indicates organization column is working)
-                        # The page should create a DataFrame with organization data
+                        # Check that page has dataframe content (indicates
+                        # organization column is working)
+                        # The page should create a DataFrame with organization
+                        # data
                         assert len(at.dataframe) > 0, (
-                            "Expected dataframe with organization column to be displayed"
+                            "Expected dataframe with organization column "
+                            "to be displayed"
                         )
 
     @patch.dict(os.environ, {"AUTH": "test_password"})
     def test_organization_helper_functions_work_correctly(self):
-        """Test that organization helper functions work correctly in app context"""
+        """Test that organization helper functions work correctly in
+        app context"""
         # Mock youth data with specific organizations
         mock_youth1 = MagicMock()
         mock_youth1.id = 1
@@ -701,9 +706,11 @@ class TestOrganizationColumnFeature:
                         # Verify the app loaded without errors
                         assert not at.exception
 
-                        # The app should display the dataframe with organization mappings
+                        # The app should display the dataframe with
+                        # organization mappings
                         assert len(at.dataframe) > 0, (
-                            "Expected compiled entries dataframe to be displayed"
+                            "Expected compiled entries dataframe to be "
+                            "displayed"
                         )
 
 
@@ -744,7 +751,8 @@ class TestPageErrorHandling:
         def task_format_func(x):
             return task_options[x] if x in task_options else ""
 
-        # Test with None (which shouldn't be in options but could be selected initially)
+        # Test with None (which shouldn't be in options but could be
+        # selected initially)
         assert youth_format_func(None) == ""
         assert task_format_func(None) == ""
 

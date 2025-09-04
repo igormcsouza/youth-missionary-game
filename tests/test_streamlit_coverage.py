@@ -1,7 +1,8 @@
 """
 Additional Streamlit testing scenarios to improve coverage using AppTest API.
-This file focuses on comprehensive coverage of form submissions, button interactions,
-and data display scenarios that are not covered by the main test files.
+This file focuses on comprehensive coverage of form submissions, button
+interactions, and data display scenarios that are not covered by the main
+test files.
 """
 
 import os
@@ -16,7 +17,8 @@ sys.path.insert(0, os.path.join(os.path.dirname(__file__), "..", "src"))
 
 
 class TestStreamlitPageCoverage:
-    """Test Streamlit pages for coverage - focused on exercising page code paths"""
+    """Test Streamlit pages for coverage - focused on exercising
+    page code paths"""
 
     @patch.dict(os.environ, {"AUTH": "test_password"})
     @patch("database.YouthFormDataRepository.get_all")
@@ -90,7 +92,8 @@ class TestStreamlitPageCoverage:
 
 
 class TestDadosGincanaPageComprehensive:
-    """Comprehensive testing of Dados da Gincana page to achieve high coverage"""
+    """Comprehensive testing of Dados da Gincana page to achieve
+    high coverage"""
 
     @patch.dict(os.environ, {"AUTH": "test_password"})
     @patch("database.YouthFormDataRepository.get_all")
@@ -163,7 +166,8 @@ class TestDadosGincanaPageComprehensive:
 
 
 class TestRegistroTarefasPageComprehensive:
-    """Comprehensive testing of Registro das Tarefas page to achieve high coverage"""
+    """Comprehensive testing of Registro das Tarefas page to achieve
+    high coverage"""
 
     @patch.dict(os.environ, {"AUTH": "test_password"})
     def test_helper_functions_with_missing_data(self):
@@ -237,12 +241,14 @@ class TestRegistroTarefasPageComprehensive:
                         )
                         at.run()
 
-                        # Should handle missing task gracefully and calculate 0 points
+                        # Should handle missing task gracefully and calculate
+                        # 0 points
                         assert not at.exception
 
 
 class TestFormInteractions:
-    """Test specific form logic and edge cases without complex UI interactions"""
+    """Test specific form logic and edge cases without complex
+    UI interactions"""
 
     @patch.dict(os.environ, {"AUTH": "test_password"})
     def test_authentication_scenarios(self):

@@ -1,5 +1,4 @@
 import os
-import re
 import sys
 from datetime import datetime, timedelta
 from unittest.mock import MagicMock, patch
@@ -56,7 +55,8 @@ class TestDashboardMetricsStructure:
 
         # Check headers that exist
         headers = [h.value for h in at.header] if at.header else []
-        # The activity header may or may not appear depending on data, but structure should be valid
+        # The activity header may or may not appear depending on data,
+        # but structure should be valid
         assert isinstance(headers, list)
 
 
@@ -69,7 +69,8 @@ class TestDashboardTimeBasedCalculations:
         # Test with different days to ensure Sunday-Saturday week calculation
         with freeze_time("2023-01-01 15:30:00"):  # Sunday afternoon
             result = Dashboard.get_last_sunday()
-            # Should return previous Sunday (2022-12-25) since current day is Sunday
+            # Should return previous Sunday (2022-12-25) since current day
+            # is Sunday
             expected = datetime(2022, 12, 25, 0, 0, 0)
             assert result == expected
 
@@ -90,7 +91,8 @@ class TestDashboardTargetTasks:
     """Test target tasks mapping and new metrics (issue #24 fix)"""
 
     def test_target_tasks_mapping_structure(self):
-        """Test that target_tasks mapping has correct structure without Batismos"""
+        """Test that target_tasks mapping has correct structure
+        without Batismos"""
 
         # Mock data to trigger calculate_task_totals
         with (
@@ -165,10 +167,12 @@ class TestDashboardTargetTasks:
 
 
 class TestDashboardDeltaTextFormat:
-    """Test that delta text shows '+X novos' instead of '+X esta semana' (issue #24 fix)"""
+    """Test that delta text shows '+X novos' instead of '+X esta semana'
+    (issue #24 fix)"""
 
     def test_delta_text_format_logic(self):
-        """Test that delta text format uses 'novos' instead of 'esta semana' in the code"""
+        """Test that delta text format uses 'novos' instead of
+        'esta semana' in the code"""
         # Test the string formatting logic directly
         delta_value = 5
 
@@ -196,7 +200,8 @@ class TestDashboardDataProcessing:
     """Test dashboard data processing and calculations"""
 
     def test_calculate_task_totals_with_realistic_data(self):
-        """Test calculate_task_totals function with realistic missionary data"""
+        """Test calculate_task_totals function with realistic
+        missionary data"""
 
         # Mock realistic missionary activity data
         with (
@@ -218,12 +223,14 @@ class TestDashboardDataProcessing:
                 MagicMock(id=4, tasks="Visitar com as Sisteres"),
                 MagicMock(
                     id=5,
-                    tasks="Postar mensagem do evangelho nas redes sociais + print",
+                    tasks=("Postar mensagem do evangelho nas redes sociais "
+                           "+ print"),
                 ),
                 MagicMock(id=6, tasks="Fazer noite familiar com pesquisador"),
             ]
 
-            # Mock compiled data with various timestamps (some this week, some older)
+            # Mock compiled data with various timestamps (some this week,
+            # some older)
             current_time = datetime.now()
             last_sunday = current_time - timedelta(
                 days=current_time.weekday() + 1
@@ -318,7 +325,8 @@ class TestDashboardVisualRegressionAndUI:
         assert "Painel de Jovens Missionários" in at.title[0].value
 
     def test_no_batismos_references_anywhere(self):
-        """Test that no Batismos references appear anywhere in dashboard (issue #24 fix)"""
+        """Test that no Batismos references appear anywhere in dashboard
+        (issue #24 fix)"""
         os.chdir(os.path.join(os.path.dirname(__file__), "..", "src"))
         at = AppTest.from_file("Dashboard.py")
         at.run()
@@ -362,8 +370,10 @@ class TestDashboardWeekCalculationEdgeCases:
         expected_week_start = datetime(2023, 1, 1, 0, 0, 0)
         assert saturday_result == expected_week_start
 
-        # Sunday should point to previous week start (Sunday 2023-01-01 again, since it's the same Sunday)
-        # Actually, when it's Sunday, get_last_sunday returns the previous Sunday
+        # Sunday should point to previous week start (Sunday 2023-01-01
+        # again, since it's the same Sunday)
+        # Actually, when it's Sunday, get_last_sunday returns the
+        # previous Sunday
         expected_prev_sunday = datetime(2023, 1, 1, 0, 0, 0)
         assert sunday_result == expected_prev_sunday
 
@@ -380,10 +390,12 @@ class TestDashboardWeekCalculationEdgeCases:
 
 
 class TestDashboardNewFeatures:
-    """Test new dashboard features: weekly leaderboard, book deliveries chart, countdown"""
+    """Test new dashboard features: weekly leaderboard, book deliveries
+    chart, countdown"""
 
     def test_activities_contain_correct_metrics_only(self):
-        """Test that dashboard activities array contains exactly the correct 5 activities"""
+        """Test that dashboard activities array contains exactly the
+        correct 5 activities"""
 
         # We can test this by checking the code structure directly
         # Look at the activities array defined in the Dashboard.py file
@@ -411,12 +423,14 @@ class TestDashboardNewFeatures:
         # Check that all expected activities are in the source code
         for activity in expected_activities:
             assert activity in content, (
-                f"Expected activity {activity} not found in Dashboard.py source code"
+                f"Expected activity {activity} not found in Dashboard.py "
+                "source code"
             )
 
         # Ensure the removed activity is not present in the source code
         assert '"Pessoas na igreja"' not in content, (
-            "Removed activity 'Pessoas na igreja' should not be present in source code"
+            "Removed activity 'Pessoas na igreja' should not be present "
+            "in source code"
         )
         assert '"⛪"' not in content, (
             "Removed church icon should not be present in source code"
@@ -448,24 +462,30 @@ class TestDashboardNewFeatures:
         # Count the number of activity tuples by counting opening parentheses
         # Each tuple in the activities array starts with an opening parenthesis
         # Exclude the parentheses from function calls within the tuples
-        
-        # Simply count lines that contain activity names (quoted strings that are activity names)
+
+        # Simply count lines that contain activity names (quoted strings
+        # that are activity names)
         activity_names = [
             "Livros de Mórmon",
-            "Referências", 
+            "Referências",
             "Lições",
             "Posts",
             "Noites familiares"
         ]
-        
+
         tuple_count = 0
         for name in activity_names:
             if f'"{name}"' in activities_section:
                 tuple_count += 1
 
+        missing_activities = [
+            name for name in activity_names
+            if f'"{name}"' not in activities_section
+        ]
         assert tuple_count == 5, (
-            f"Expected exactly 5 activities in the array, but found {tuple_count}. "
-            f"Missing activities: {[name for name in activity_names if f'\"{name}\"' not in activities_section]}"
+            f"Expected exactly 5 activities in the array, but found "
+            f"{tuple_count}. "
+            f"Missing activities: {missing_activities}"
         )
 
     def test_calculate_weekly_youth_points_function(self):
@@ -538,7 +558,8 @@ class TestDashboardNewFeatures:
             assert weekly_points[2]["points"] == 15
 
     def test_top_5_displays_weekly_points_with_total_ranking_order(self):
-        """Test that Top 5 shows youth in total points order but displays weekly points"""
+        """Test that Top 5 shows youth in total points order but displays
+        weekly points"""
 
         with (
             patch(
@@ -736,7 +757,8 @@ class TestDashboardNewFeatures:
 
             mock_tasks.return_value = [MagicMock(id=1, points=10)]
 
-            # Give different weekly points: Youth1=70, Youth2=60, ..., Youth7=10
+            # Give different weekly points: Youth1=70, Youth2=60, ...,
+            # Youth7=10
             mock_compiled.return_value = [
                 MagicMock(
                     youth_id=i,
@@ -753,7 +775,8 @@ class TestDashboardNewFeatures:
             # Should have all 7 youth with weekly points
             assert len(weekly_points_data) == 7
 
-            # The Top 5 should be based on total points ranking (Youth1-Youth5), not weekly points
+            # The Top 5 should be based on total points ranking
+            # (Youth1-Youth5), not weekly points
             youth_entries = [
                 mock_youth.return_value[i] for i in range(5)
             ]  # First 5 by total points
@@ -771,7 +794,8 @@ class TestDashboardUILayoutImprovements:
     """Test new UI layout improvements for Top 5 and countdown"""
 
     def test_top_5_layout_format_with_data(self):
-        """Test that Top 5 section displays correct layout using st.metric format"""
+        """Test that Top 5 section displays correct layout using
+        st.metric format"""
 
         with (
             patch(
@@ -824,7 +848,8 @@ class TestDashboardUILayoutImprovements:
 
             mock_compiled.return_value = [compiled1, compiled2]
 
-            # Test that the weekly points calculation works correctly with our mock data
+            # Test that the weekly points calculation works correctly with
+            # our mock data
             weekly_points = Dashboard.calculate_weekly_youth_points()
 
             # Verify the weekly points calculation works
@@ -835,7 +860,8 @@ class TestDashboardUILayoutImprovements:
             assert weekly_points[2]["name"] == "Maria Santos"
             assert weekly_points[2]["points"] == 20  # 2 * 10 + 0
 
-            # Test that youth data has all required fields for ranking table creation
+            # Test that youth data has all required fields for ranking
+            # table creation
             youth_entries = mock_youth.return_value
             for youth in youth_entries:
                 assert hasattr(youth, "name")
@@ -896,7 +922,8 @@ class TestDashboardUILayoutImprovements:
             )
 
     def test_top_5_no_weekly_activity_state(self):
-        """Test that Top 5 shows correct message when there are youth but no weekly activity"""
+        """Test that Top 5 shows correct message when there are youth
+        but no weekly activity"""
 
         with (
             patch(
@@ -952,7 +979,8 @@ class TestDashboardUILayoutImprovements:
             )
             this_week_timestamp = (last_sunday + timedelta(days=1)).timestamp()
 
-            # Mock youth with previous total points (simulating they had points before this week)
+            # Mock youth with previous total points (simulating they had
+            # points before this week)
             mock_youth.return_value = [
                 MagicMock(
                     id=1,
@@ -966,7 +994,8 @@ class TestDashboardUILayoutImprovements:
                 MagicMock(id=1, points=10),
             ]
 
-            # Ana gained 30 points this week, so she had 20 before (simulating rank improvement)
+            # Ana gained 30 points this week, so she had 20 before
+            # (simulating rank improvement)
             mock_compiled.return_value = [
                 MagicMock(
                     youth_id=1,

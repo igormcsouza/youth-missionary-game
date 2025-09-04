@@ -32,7 +32,8 @@ class TestCompleteWorkflow:
             yield
 
     def test_complete_youth_task_workflow(self):
-        """Test complete workflow: add youth -> add task -> record completion -> verify results"""
+        """Test complete workflow: add youth -> add task -> record
+        completion -> verify results"""
         with patch("database.engine", self.test_engine):
             # Step 1: Add a youth
             youth = YouthFormDataRepository.store(
@@ -268,11 +269,14 @@ class TestDashboardDataIntegration:
 
             # Define target tasks mapping (from Dashboard.py)
             target_tasks = {
-                "Entregar Livro de Mórmon + foto + relato no grupo": "Livros de Mórmon entregues",
+                ("Entregar Livro de Mórmon + foto + relato no grupo"):
+                    "Livros de Mórmon entregues",
                 "Levar amigo à sacramental": "Pessoas levadas à igreja",
                 "Ajudar alguém a se batizar": "Batismos",
-                "Postar mensagem do evangelho nas redes sociais + print": "Posts nas redes sociais",
-                "Fazer noite familiar com pesquisador": "Sessões de noite familiar",
+                ("Postar mensagem do evangelho nas redes sociais + print"):
+                    "Posts nas redes sociais",
+                ("Fazer noite familiar com pesquisador"):
+                    "Sessões de noite familiar",
             }
 
             # Calculate totals and deltas

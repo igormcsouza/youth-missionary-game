@@ -245,7 +245,8 @@ class TestDatabaseRepositories:
             assert result is True
 
     def test_compiled_repository_has_entry_today_false_different_day(self):
-        """Test has_entry_today returns False for entries from different days"""
+        """Test has_entry_today returns False for entries from
+        different days"""
         with patch("database.engine", self.test_engine):
             # Create entry with yesterday's timestamp
             yesterday = dt.datetime.now() - dt.timedelta(days=1)
