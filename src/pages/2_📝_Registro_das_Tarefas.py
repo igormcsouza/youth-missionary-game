@@ -3,7 +3,6 @@ from datetime import datetime
 
 import pandas as pd
 import streamlit as st
-
 from database import (
     CompiledFormDataRepository,
     TasksFormDataRepository,
@@ -36,9 +35,13 @@ def refresh_youth_and_task_entries():
     )
 
 
-youth_entries, task_entries, youth_options, youth_org_options, task_options = (
-    refresh_youth_and_task_entries()
-)
+(
+    youth_entries,
+    task_entries,
+    youth_options,
+    youth_org_options,
+    task_options,
+) = refresh_youth_and_task_entries()
 task_by_id = {t.id: t for t in task_entries}
 
 with st.form("compiled_form"):

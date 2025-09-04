@@ -79,7 +79,8 @@ def handle_database_operation[T](
         )
 
         # Show user-friendly message
-        st.info(f"""
+        st.info(
+            f"""
         🔄 **Problema temporário com o banco de dados**
 
         Houve uma dificuldade ao executar a {operation_name}. Isso pode
@@ -89,5 +90,6 @@ def handle_database_operation[T](
         - Problemas de rede
 
         **💡 Solução simples:** Atualize a página (F5) para tentar novamente.
-        """)
+        """
+        )
         return None

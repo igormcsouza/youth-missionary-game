@@ -1,15 +1,12 @@
 import datetime as dt
 import os
-
-# Import the modules to test
 import sys
 from unittest.mock import patch
 
-import pytest
-from sqlmodel import SQLModel, create_engine
-
+# Add src directory to path for imports
 sys.path.insert(0, os.path.join(os.path.dirname(__file__), "..", "src"))
 
+import pytest
 from database import (
     CompiledFormData,
     CompiledFormDataRepository,
@@ -19,6 +16,7 @@ from database import (
     YouthFormDataRepository,
     default_db_path,
 )
+from sqlmodel import SQLModel, create_engine
 
 
 class TestYouthFormData:

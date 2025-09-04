@@ -1,13 +1,11 @@
 import os
-
-# Import the modules to test
 import sys
 from unittest.mock import patch
 
-import streamlit as st
-
+# Add src directory to path for imports
 sys.path.insert(0, os.path.join(os.path.dirname(__file__), "..", "src"))
 
+import streamlit as st
 from utils import check_password, handle_database_operation
 
 

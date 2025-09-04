@@ -1,15 +1,16 @@
 import os
 import sys
+
+# Add src directory to path for imports
+sys.path.insert(0, os.path.join(os.path.dirname(__file__), "..", "src"))
+
 from datetime import datetime, timedelta
 from unittest.mock import MagicMock, patch
 
+import Dashboard
 import pytest
 from freezegun import freeze_time
 from streamlit.testing.v1 import AppTest
-
-# Import the modules to test
-sys.path.insert(0, os.path.join(os.path.dirname(__file__), "..", "src"))
-import Dashboard
 
 
 class TestDashboardVisualElements:
@@ -223,8 +224,10 @@ class TestDashboardDataProcessing:
                 MagicMock(id=4, tasks="Visitar com as Sisteres"),
                 MagicMock(
                     id=5,
-                    tasks=("Postar mensagem do evangelho nas redes sociais "
-                           "+ print"),
+                    tasks=(
+                        "Postar mensagem do evangelho nas redes sociais "
+                        "+ print"
+                    ),
                 ),
                 MagicMock(id=6, tasks="Fazer noite familiar com pesquisador"),
             ]
@@ -432,9 +435,9 @@ class TestDashboardNewFeatures:
             "Removed activity 'Pessoas na igreja' should not be present "
             "in source code"
         )
-        assert '"⛪"' not in content, (
-            "Removed church icon should not be present in source code"
-        )
+        assert (
+            '"⛪"' not in content
+        ), "Removed church icon should not be present in source code"
 
         # More robust check: find the activities array section
         activities_start = content.find("activities = [")
@@ -470,7 +473,7 @@ class TestDashboardNewFeatures:
             "Referências",
             "Lições",
             "Posts",
-            "Noites familiares"
+            "Noites familiares",
         ]
 
         tuple_count = 0
@@ -479,7 +482,8 @@ class TestDashboardNewFeatures:
                 tuple_count += 1
 
         missing_activities = [
-            name for name in activity_names
+            name
+            for name in activity_names
             if f'"{name}"' not in activities_section
         ]
         assert tuple_count == 5, (
@@ -889,9 +893,9 @@ class TestDashboardUILayoutImprovements:
                 found_countdown = True
                 break
 
-        assert found_countdown, (
-            "Countdown should be displayed in simple markdown format"
-        )
+        assert (
+            found_countdown
+        ), "Countdown should be displayed in simple markdown format"
 
     def test_top_5_empty_state_unchanged(self):
         """Test that Top 5 empty state still displays correctly"""
