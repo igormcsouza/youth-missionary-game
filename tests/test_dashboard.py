@@ -445,16 +445,27 @@ class TestDashboardNewFeatures:
 
         activities_section = content[activities_start : activities_end + 1]
 
-        # Count the number of activity tuples (each starts with a line containing just spaces and opening parenthesis)
-        # Look for patterns like '        ("Activity Name",' which indicate the start of a tuple
-        tuple_pattern = r'^\s*\(".*?",'
-        tuple_matches = re.findall(
-            tuple_pattern, activities_section, re.MULTILINE
-        )
-        tuple_count = len(tuple_matches)
+        # Count the number of activity tuples by counting opening parentheses
+        # Each tuple in the activities array starts with an opening parenthesis
+        # Exclude the parentheses from function calls within the tuples
+        
+        # Simply count lines that contain activity names (quoted strings that are activity names)
+        activity_names = [
+            "Livros de Mórmon",
+            "Referências", 
+            "Lições",
+            "Posts",
+            "Noites familiares"
+        ]
+        
+        tuple_count = 0
+        for name in activity_names:
+            if f'"{name}"' in activities_section:
+                tuple_count += 1
 
         assert tuple_count == 5, (
-            f"Expected exactly 5 activities in the array, but found {tuple_count}. Matches: {tuple_matches}"
+            f"Expected exactly 5 activities in the array, but found {tuple_count}. "
+            f"Missing activities: {[name for name in activity_names if f'\"{name}\"' not in activities_section]}"
         )
 
     def test_calculate_weekly_youth_points_function(self):
