@@ -7,6 +7,8 @@ from unittest.mock import patch
 sys.path.insert(0, os.path.join(os.path.dirname(__file__), "..", "src"))
 
 import pytest
+from sqlmodel import SQLModel, create_engine
+
 from database import (
     CompiledFormData,
     CompiledFormDataRepository,
@@ -16,7 +18,6 @@ from database import (
     YouthFormDataRepository,
     default_db_path,
 )
-from sqlmodel import SQLModel, create_engine
 
 
 class TestYouthFormData:
