@@ -6,7 +6,6 @@ from unittest.mock import patch
 sys.path.insert(0, os.path.join(os.path.dirname(__file__), "..", "src"))
 
 import streamlit as st
-
 from utils import check_password, handle_database_operation
 
 

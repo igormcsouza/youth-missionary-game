@@ -7,11 +7,10 @@ sys.path.insert(0, os.path.join(os.path.dirname(__file__), "..", "src"))
 from datetime import datetime, timedelta
 from unittest.mock import MagicMock, patch
 
+import Dashboard
 import pytest
 from freezegun import freeze_time
 from streamlit.testing.v1 import AppTest
-
-import Dashboard
 
 
 class TestDashboardVisualElements:
