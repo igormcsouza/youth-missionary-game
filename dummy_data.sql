@@ -1,0 +1,25 @@
+-- Dummy data for testing the Youth Missionary Game application
+-- This file contains sample data for all tables with dates from the last 3 weeks
+-- Should be used when POPULATEDUMMY environment variable is set to true
+-- 
+-- NOTE: This file is kept for reference but data is now populated programmatically
+-- via the populate_dummy_data() function in database.py for better timestamp handling.
+--
+-- Contains:
+-- - 26 youth entries (13 Rapazes, 13 Moças) aged 15-18 with varying point totals
+-- - 25 task entries including all expected Dashboard.py tasks plus additional activities  
+-- - 70+ compiled task completion entries spread across the last 3 weeks
+--
+-- Expected tasks that match Dashboard.py requirements:
+-- - Entregar Livro de Mórmon + foto + relato no grupo (25 points, repeatable)
+-- - Levar amigo à sacramental (20 points, repeatable) 
+-- - Dar contato (tel/endereço) às Sisteres (15 points, repeatable)
+-- - Visitar com as Sisteres (30 points, repeatable)
+-- - Postar mensagem do evangelho nas redes sociais + print (10 points, repeatable)
+-- - Fazer noite familiar com pesquisador (25 points, repeatable)
+
+-- This SQL file is preserved for documentation purposes.
+-- Actual population is handled by the populate_dummy_data() function in database.py
+
+-- This SQL file is preserved for documentation purposes.
+-- Actual population is handled by the populate_dummy_data() function in database.py
