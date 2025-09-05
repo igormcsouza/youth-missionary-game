@@ -50,6 +50,11 @@ jobs:
       run: |
         poetry run pytest tests/ --cov=src --cov-report=xml --cov-report=term-missing --cov-fail-under=85 -v
 
+    - name: Test Docker build
+      run: |
+        docker build --build-arg PIP_TRUSTED_HOST=1 -t youth-missionary-game:ci-test .
+        echo "✅ Docker build successful"
+
     - name: Upload coverage to Codecov
       id: codecov
       if: success()

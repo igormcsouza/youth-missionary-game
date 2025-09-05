@@ -15,6 +15,9 @@ RUN if [ -n "$PIP_TRUSTED_HOST" ]; then \
 # Copy poetry files
 COPY pyproject.toml poetry.lock* ./
 
+# Copy README for poetry package installation
+COPY README.md ./
+
 # Configure poetry: do not create virtual environment since we're in a container
 RUN poetry config virtualenvs.create false
 
@@ -22,9 +25,9 @@ RUN poetry config virtualenvs.create false
 RUN if [ -n "$PIP_TRUSTED_HOST" ]; then \
         poetry config repositories.pypi https://pypi.org/simple/ && \
         poetry config certificates.pypi.cert false && \
-        poetry install --only=main --no-interaction --no-ansi; \
+        poetry install --only=main --no-root --no-interaction --no-ansi; \
     else \
-        poetry install --only=main --no-interaction --no-ansi; \
+        poetry install --only=main --no-root --no-interaction --no-ansi; \
     fi
 
 # Copy source code
