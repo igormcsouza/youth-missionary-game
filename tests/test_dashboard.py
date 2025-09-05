@@ -436,9 +436,9 @@ class TestDashboardNewFeatures:
             "Removed activity 'Pessoas na igreja' should not be present "
             "in source code"
         )
-        assert (
-            '"⛪"' not in content
-        ), "Removed church icon should not be present in source code"
+        assert '"⛪"' not in content, (
+            "Removed church icon should not be present in source code"
+        )
 
         # More robust check: find the activities array section
         activities_start = content.find("activities = [")
@@ -894,9 +894,9 @@ class TestDashboardUILayoutImprovements:
                 found_countdown = True
                 break
 
-        assert (
-            found_countdown
-        ), "Countdown should be displayed in simple markdown format"
+        assert found_countdown, (
+            "Countdown should be displayed in simple markdown format"
+        )
 
     def test_top_5_empty_state_unchanged(self):
         """Test that Top 5 empty state still displays correctly"""

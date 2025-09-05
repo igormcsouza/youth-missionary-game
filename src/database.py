@@ -240,33 +240,34 @@ class CompiledFormDataRepository:
 def populate_dummy_data():
     """Populate database with dummy data for testing purposes.
     Only runs if POPULATEDUMMY environment variable is set to 'true'."""
-    
+
     if os.getenv("POPULATEDUMMY", "").lower() != "true":
         return
-    
+
     # Check if data already exists to avoid duplicates
     if YouthFormDataRepository.get_all():
         print("Dummy data already exists, skipping population.")
         return
-    
+
     try:
         import time
+
         current_time = time.time()
-        
+
         # Calculate timestamps for the last 3 weeks
         week1_timestamps = []
         week2_timestamps = []
         week3_timestamps = []
-        
+
         for days_ago in range(20, 14, -1):  # Week 1: 20-15 days ago
             week1_timestamps.append(current_time - (days_ago * 24 * 60 * 60))
-        
-        for days_ago in range(14, 7, -1):   # Week 2: 14-8 days ago
+
+        for days_ago in range(14, 7, -1):  # Week 2: 14-8 days ago
             week2_timestamps.append(current_time - (days_ago * 24 * 60 * 60))
-            
-        for days_ago in range(7, 0, -1):    # Week 3: 7-1 days ago
+
+        for days_ago in range(7, 0, -1):  # Week 3: 7-1 days ago
             week3_timestamps.append(current_time - (days_ago * 24 * 60 * 60))
-        
+
         with Session(engine) as session:
             # First, populate youth data
             youth_data = [
@@ -297,20 +298,28 @@ def populate_dummy_data():
                 ("Amanda Ribeiro", 16, "Moças", 160),
                 ("Jéssica Pereira", 17, "Moças", 180),
             ]
-            
+
             for name, age, org, points in youth_data:
                 youth = YouthFormData(
                     name=name, age=age, organization=org, total_points=points
                 )
                 session.add(youth)
-            
+
             # Populate task data
             task_data = [
-                ("Entregar Livro de Mórmon + foto + relato no grupo", 25, True),
+                (
+                    "Entregar Livro de Mórmon + foto + relato no grupo",
+                    25,
+                    True,
+                ),
                 ("Levar amigo à sacramental", 20, True),
                 ("Dar contato (tel/endereço) às Sisteres", 15, True),
                 ("Visitar com as Sisteres", 30, True),
-                ("Postar mensagem do evangelho nas redes sociais + print", 10, True),
+                (
+                    "Postar mensagem do evangelho nas redes sociais + print",
+                    10,
+                    True,
+                ),
                 ("Fazer noite familiar com pesquisador", 25, True),
                 ("Orar em família", 5, True),
                 ("Ler as escrituras por 30 minutos", 10, True),
@@ -332,16 +341,16 @@ def populate_dummy_data():
                 ("Participar de projeto de bem-estar", 20, True),
                 ("Estudar Livro de Mórmon em grupo", 12, True),
             ]
-            
+
             for task_name, points, repeatable in task_data:
                 task = TasksFormData(
                     tasks=task_name, points=points, repeatable=repeatable
                 )
                 session.add(task)
-            
+
             session.commit()
             session.refresh(youth)  # Get the IDs
-            
+
             # Now populate compiled data with proper timestamps
             compiled_entries = [
                 # Week 1 entries (using week1_timestamps)
@@ -363,7 +372,6 @@ def populate_dummy_data():
                 (16, 4, week1_timestamps[3], 1, 0),
                 (17, 5, week1_timestamps[4], 3, 2),
                 (18, 6, week1_timestamps[5], 1, 0),
-                
                 # Week 2 entries (using week2_timestamps)
                 (19, 13, week2_timestamps[0], 2, 1),
                 (20, 14, week2_timestamps[1], 1, 0),
@@ -384,7 +392,6 @@ def populate_dummy_data():
                 (10, 4, week2_timestamps[2], 1, 0),
                 (11, 5, week2_timestamps[3], 1, 2),
                 (12, 6, week2_timestamps[4], 2, 0),
-                
                 # Week 3 entries (using week3_timestamps)
                 (13, 7, week3_timestamps[0], 3, 1),
                 (14, 8, week3_timestamps[1], 2, 0),
@@ -407,7 +414,6 @@ def populate_dummy_data():
                 (5, 19, week3_timestamps[4], 1, 0),
                 (6, 20, week3_timestamps[5], 2, 1),
                 (7, 21, week3_timestamps[6], 1, 0),
-                
                 # Additional entries to ensure we have 50+ compiled entries
                 (8, 1, week3_timestamps[1], 1, 1),
                 (9, 2, week3_timestamps[2], 2, 0),
@@ -422,24 +428,31 @@ def populate_dummy_data():
                 (18, 5, week3_timestamps[4], 2, 2),
                 (19, 6, week3_timestamps[5], 1, 0),
             ]
-            
-            for youth_id, task_id, timestamp, quantity, bonus in compiled_entries:
+
+            for (
+                youth_id,
+                task_id,
+                timestamp,
+                quantity,
+                bonus,
+            ) in compiled_entries:
                 compiled = CompiledFormData(
                     youth_id=youth_id,
                     task_id=task_id,
                     timestamp=timestamp,
                     quantity=quantity,
-                    bonus=bonus
+                    bonus=bonus,
                 )
                 session.add(compiled)
-            
+
             session.commit()
-        
+
         print("Successfully populated database with dummy data.")
-        
+
     except Exception as e:
         print(f"Error populating dummy data: {str(e)}")
         import traceback
+
         traceback.print_exc()
 
 
