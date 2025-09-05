@@ -27,7 +27,7 @@ Always reference these instructions first and fallback to search or bash command
 ### Validation and Testing
 - **COMPREHENSIVE TESTING INFRASTRUCTURE**: 116+ unit, integration, and UI tests with pytest configuration
 - Run all tests: `pytest tests/ -v` -- takes ~3 seconds to complete
-- Test with coverage: `pytest tests/ --cov=src --cov-report=term-missing -v` -- takes ~3 seconds 
+- Test with coverage: `pytest tests/ --cov=src --cov-report=term-missing -v` -- takes ~3 seconds
 - **Target coverage**: 85%+ as configured in pytest.ini
 - **Test categories**: Unit tests, integration tests, Streamlit UI tests, database tests
 - Validate Python syntax: `python -m py_compile src/*.py src/pages/*.py` -- completes in under 10 seconds

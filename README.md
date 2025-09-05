@@ -26,20 +26,26 @@ A Streamlit-based web application for managing youth missionary competitions. Th
 
 2. **Install dependencies:**
    ```bash
-   pip install -r requirements.txt
+   pip install poetry
+   poetry install
    ```
 
-3. **Set up authentication (optional for development):**
+3. **Set up pre-commit hooks (recommended for all developers):**
+   ```bash
+   poetry run pre-commit install
+   ```
+
+4. **Set up authentication (optional for development):**
    ```bash
    export AUTH="your-password-here"
    ```
 
-4. **Run the application:**
+5. **Run the application:**
    ```bash
-   streamlit run src/Dashboard.py
+   poetry run streamlit run src/Dashboard.py
    ```
 
-5. **Open your browser and navigate to:** `http://localhost:8501`
+6. **Open your browser and navigate to:** `http://localhost:8501`
 
 ## Development Setup
 
@@ -72,6 +78,26 @@ The application follows a standard Streamlit multi-page structure:
 - `src/pages/2_📝_Registro_das_Tarefas.py` - Task completion tracking
 - `src/database.py` - Database models and repositories
 - `src/utils.py` - Utility functions including authentication
+
+### Code Quality
+
+This project uses modern Python tooling for code quality:
+
+- **Ruff** - Fast Python linter and formatter
+- **Pre-commit hooks** - Automatic code quality checks before commits
+- **pytest** - Comprehensive testing with 87% coverage
+
+Run code quality checks manually:
+```bash
+# Format code with Ruff
+poetry run ruff format
+
+# Lint code with Ruff
+poetry run ruff check --fix
+
+# Run tests with coverage
+poetry run pytest
+```
 
 ## Deployment
 
@@ -120,9 +146,34 @@ flyctl secrets set POSTGRESCONNECTIONSTRING="your-postgres-connection-string"
 
 This project includes comprehensive testing with pytest and coverage reporting. Tests are automatically run on every push and pull request.
 
-- **Run tests locally**: `pytest tests/ --cov=src --cov-report=term-missing -v`
+- **Run tests locally**: `poetry run pytest tests/ --cov=src --cov-report=term-missing -v`
 - **Target coverage**: 85%+
 - **Test categories**: Unit tests, integration tests, Streamlit UI tests
+
+### Code Quality
+
+This project uses modern Python tooling for code quality:
+
+- **Dependency Management**: Poetry for dependency management and virtual environments
+- **Linting**: Ruff for fast Python linting and code formatting
+- **Formatting**: Automatic code formatting with Ruff
+- **CI/CD**: Automated linting and testing on every commit
+
+#### Code Quality Commands
+
+```bash
+# Run linting and formatting checks
+poetry run ruff check src/ tests/
+
+# Auto-fix linting issues
+poetry run ruff check --fix src/ tests/
+
+# Format code
+poetry run ruff format src/ tests/
+
+# Run all tests with coverage
+poetry run pytest tests/ --cov=src --cov-report=term-missing -v
+```
 
 ## License
 

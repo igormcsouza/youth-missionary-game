@@ -1,0 +1,50 @@
+# Pre-commit configuration for all developers
+# Installation: poetry run pre-commit install
+
+repos:
+ # Additional quality checks
+  - repo: https://github.com/pre-commit/pre-commit-hooks
+    rev: v5.0.0
+    hooks:
+      # Check for files that would conflict in case-insensitive filesystems
+      - id: check-case-conflict
+      # Check that files parse as valid Python
+      - id: check-ast
+      # Check for debugger imports and py37+ breakpoint() calls
+      - id: debug-statements
+      # Check for merge conflicts
+      - id: check-merge-conflict
+      # Check YAML files for syntax errors
+      - id: check-yaml
+      # Check TOML files for syntax errors
+      - id: check-toml
+      # Ensure files end with a newline
+      - id: end-of-file-fixer
+      # Remove trailing whitespace
+      - id: trailing-whitespace
+        args: [--markdown-linebreak-ext=md]
+
+  # Ruff - Python linter and formatter (replaces Black, isort, flake8, etc.)
+  - repo: https://github.com/astral-sh/ruff-pre-commit
+    rev: v0.7.4
+    hooks:
+      # Run the linter (skip line length for now)
+      - id: ruff
+        args: [--fix, --unsafe-fixes]
+        name: ruff-linter
+        description: "Run ruff linter with auto-fixes (ignore line length)"
+
+      # Run the formatter
+      - id: ruff-format
+        name: ruff-formatter
+        description: "Run ruff formatter"
+
+  - repo: local
+    hooks:
+      - id: pytest
+        name: pytest-quick
+        entry: poetry run pytest tests/ -x --tb=short -q
+        language: system
+        types: [python]
+        pass_filenames: false
+        always_run: true

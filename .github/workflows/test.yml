@@ -9,30 +9,59 @@ on:
 jobs:
   test:
     runs-on: ubuntu-latest
-    
+
     steps:
     - uses: actions/checkout@v4
-    
+
     - name: Set up Python 3.12
+      id: setup-python
       uses: actions/setup-python@v4
       with:
         python-version: "3.12"
-    
+
+    - name: Install Poetry
+      uses: snok/install-poetry@v1
+      with:
+        version: latest
+        virtualenvs-create: true
+        virtualenvs-in-project: true
+        installer-parallel: true
+
+    - name: Load cached venv
+      id: cached-poetry-dependencies
+      uses: actions/cache@v3
+      with:
+        path: .venv
+        key: venv-${{ runner.os }}-${{ steps.setup-python.outputs.python-version }}-${{ hashFiles('**/poetry.lock') }}
+
     - name: Install dependencies
-      run: |
-        python -m pip install --upgrade pip
-        pip install -r requirements.txt
-    
+      if: steps.cached-poetry-dependencies.outputs.cache-hit != 'true'
+      run: poetry install --no-interaction
+
+    - name: Install pre-commit hooks
+      run: poetry run pre-commit install
+
+    - name: Run pre-commit on all files
+      run: poetry run pre-commit run --all-files
+
     - name: Run tests with coverage
       env:
         AUTH: test_password_for_ci
       run: |
-        python -m pytest tests/ --cov=src --cov-report=xml --cov-report=term-missing --cov-fail-under=85 -v
-    
+        poetry run pytest tests/ --cov=src --cov-report=xml --cov-report=term-missing --cov-fail-under=85 -v
+
+    - name: Test Docker build
+      run: |
+        docker build --build-arg PIP_TRUSTED_HOST=1 -t youth-missionary-game:ci-test .
+        echo "✅ Docker build successful"
+
     - name: Upload coverage to Codecov
+      id: codecov
       if: success()
-      uses: codecov/codecov-action@v3
+      uses: codecov/codecov-action@v4
       with:
         file: ./coverage.xml
-        fail_ci_if_error: false
+        token: ${{ secrets.CODECOV_TOKEN }}
+        fail_ci_if_error: true
         verbose: true
+      continue-on-error: true

@@ -4,17 +4,34 @@ FROM python:3.12-slim
 # Set working directory
 WORKDIR /app
 
-# Copy requirements and source code
-COPY requirements.txt ./
-COPY src/ ./src/
-
-# Install dependencies
+# Install Poetry
 ARG PIP_TRUSTED_HOST
 RUN if [ -n "$PIP_TRUSTED_HOST" ]; then \
-        pip install --no-cache-dir --trusted-host pypi.org --trusted-host pypi.python.org --trusted-host files.pythonhosted.org -r requirements.txt; \
+        pip install --trusted-host pypi.org --trusted-host pypi.python.org --trusted-host files.pythonhosted.org poetry; \
     else \
-        pip install --no-cache-dir -r requirements.txt; \
+        pip install poetry; \
     fi
+
+# Copy poetry files
+COPY pyproject.toml poetry.lock* ./
+
+# Copy README for poetry package installation
+COPY README.md ./
+
+# Configure poetry: do not create virtual environment since we're in a container
+RUN poetry config virtualenvs.create false
+
+# Install dependencies
+RUN if [ -n "$PIP_TRUSTED_HOST" ]; then \
+        poetry config repositories.pypi https://pypi.org/simple/ && \
+        poetry config certificates.pypi.cert false && \
+        poetry install --only=main --no-root --no-interaction --no-ansi; \
+    else \
+        poetry install --only=main --no-root --no-interaction --no-ansi; \
+    fi
+
+# Copy source code
+COPY src/ ./src/
 
 # Expose Streamlit port
 EXPOSE 8080
