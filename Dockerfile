@@ -25,6 +25,7 @@ RUN poetry config virtualenvs.create false
 RUN if [ -n "$PIP_TRUSTED_HOST" ]; then \
         poetry config repositories.pypi https://pypi.org/simple/ && \
         poetry config certificates.pypi.cert false && \
+        pip config set global.trusted-host "pypi.org files.pythonhosted.org pypi.python.org" && \
         poetry install --only=main --no-root --no-interaction --no-ansi; \
     else \
         poetry install --only=main --no-root --no-interaction --no-ansi; \
