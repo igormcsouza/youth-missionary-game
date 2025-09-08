@@ -44,7 +44,8 @@ class TestRegistroTarefasPageStreamlit:
                 "database.YouthFormDataRepository.get_all", return_value=[]
             ):
                 with patch(
-                    "database.TasksFormDataRepository.get_all", return_value=[]
+                    "database.TasksFormDataRepository.get_all",
+                    return_value=[],
                 ):
                     os.chdir(
                         os.path.join(os.path.dirname(__file__), "..", "src")
@@ -73,7 +74,8 @@ class TestRegistroTarefasPageStreamlit:
                 "database.YouthFormDataRepository.get_all", return_value=[]
             ):
                 with patch(
-                    "database.TasksFormDataRepository.get_all", return_value=[]
+                    "database.TasksFormDataRepository.get_all",
+                    return_value=[],
                 ):
                     os.chdir(
                         os.path.join(os.path.dirname(__file__), "..", "src")
@@ -139,7 +141,8 @@ class TestRegistroTarefasPageStreamlit:
                 "database.YouthFormDataRepository.get_all", return_value=[]
             ):
                 with patch(
-                    "database.TasksFormDataRepository.get_all", return_value=[]
+                    "database.TasksFormDataRepository.get_all",
+                    return_value=[],
                 ):
                     with patch(
                         "database.CompiledFormDataRepository.get_all",
