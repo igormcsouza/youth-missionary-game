@@ -1,12 +1,12 @@
 import pandas as pd
 import streamlit as st
 
-from src.database import (
+from database import (
     CompiledFormDataRepository,
     TasksFormDataRepository,
     YouthFormDataRepository,
 )
-from src.utils import check_password
+from utils import check_password
 
 st.set_page_config(page_title="Dados dos Jovens e Tarefas", page_icon="📁")
 

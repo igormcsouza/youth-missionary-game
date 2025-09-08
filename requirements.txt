@@ -1,4 +1,0 @@
-streamlit
-sqlmodel
-plotly
-psycopg2-binary

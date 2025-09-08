@@ -39,7 +39,6 @@ EXPOSE 8080
 # Set environment variables for Streamlit
 ENV STREAMLIT_SERVER_PORT=8080
 ENV STREAMLIT_SERVER_ADDRESS=0.0.0.0
-ENV PYTHONPATH=/app
 
 # Default command to run Streamlit app
 CMD ["streamlit", "run", "src/Dashboard.py"]

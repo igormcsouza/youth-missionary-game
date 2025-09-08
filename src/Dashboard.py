@@ -5,7 +5,7 @@ import plotly.express as px
 import plotly.graph_objects as go
 import streamlit as st
 
-from src.database import (
+from database import (
     CompiledFormDataRepository,
     TasksFormDataRepository,
     YouthFormDataRepository,

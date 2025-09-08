@@ -16,7 +16,7 @@ class TestDadosGincanaPageStreamlit:
     @patch.dict(os.environ, {"AUTH": "test_password"})
     def test_page_loads_with_auth(self):
         """Test that the page loads when authenticated"""
-        with patch("src.utils.check_password", return_value=True):
+        with patch("utils.check_password", return_value=True):
             os.chdir(os.path.join(os.path.dirname(__file__), "..", "src"))
             at = AppTest.from_file("pages/1_📁_Dados_da_Gincana.py")
             at.run()
@@ -25,7 +25,7 @@ class TestDadosGincanaPageStreamlit:
     @patch.dict(os.environ, {"AUTH": "test_password"})
     def test_page_title_displayed(self):
         """Test that the page title is displayed"""
-        with patch("src.utils.check_password", return_value=True):
+        with patch("utils.check_password", return_value=True):
             os.chdir(os.path.join(os.path.dirname(__file__), "..", "src"))
             at = AppTest.from_file("pages/1_📁_Dados_da_Gincana.py")
             at.run()
@@ -39,12 +39,12 @@ class TestRegistroTarefasPageStreamlit:
     @patch.dict(os.environ, {"AUTH": "test_password"})
     def test_page_loads_with_auth(self):
         """Test that the page loads when authenticated"""
-        with patch("src.utils.check_password", return_value=True):
+        with patch("utils.check_password", return_value=True):
             with patch(
-                "src.database.YouthFormDataRepository.get_all", return_value=[]
+                "database.YouthFormDataRepository.get_all", return_value=[]
             ):
                 with patch(
-                    "src.database.TasksFormDataRepository.get_all",
+                    "database.TasksFormDataRepository.get_all",
                     return_value=[],
                 ):
                     os.chdir(
@@ -59,7 +59,7 @@ class TestRegistroTarefasPageStreamlit:
     @patch.dict(os.environ, {"AUTH": "test_password"})
     def test_page_stops_without_auth(self):
         """Test that the page stops when not authenticated"""
-        with patch("src.utils.check_password", return_value=False):
+        with patch("utils.check_password", return_value=False):
             os.chdir(os.path.join(os.path.dirname(__file__), "..", "src"))
             at = AppTest.from_file("pages/2_📝_Registro_das_Tarefas.py")
             at.run()
@@ -69,12 +69,12 @@ class TestRegistroTarefasPageStreamlit:
     @patch.dict(os.environ, {"AUTH": "test_password"})
     def test_page_title_displayed(self):
         """Test that the page title is displayed"""
-        with patch("src.utils.check_password", return_value=True):
+        with patch("utils.check_password", return_value=True):
             with patch(
-                "src.database.YouthFormDataRepository.get_all", return_value=[]
+                "database.YouthFormDataRepository.get_all", return_value=[]
             ):
                 with patch(
-                    "src.database.TasksFormDataRepository.get_all",
+                    "database.TasksFormDataRepository.get_all",
                     return_value=[],
                 ):
                     os.chdir(
@@ -107,17 +107,17 @@ class TestRegistroTarefasPageStreamlit:
         mock_compiled.quantity = 2
         mock_compiled.bonus = 5
 
-        with patch("src.utils.check_password", return_value=True):
+        with patch("utils.check_password", return_value=True):
             with patch(
-                "src.database.YouthFormDataRepository.get_all",
+                "database.YouthFormDataRepository.get_all",
                 return_value=[mock_youth],
             ):
                 with patch(
-                    "src.database.TasksFormDataRepository.get_all",
+                    "database.TasksFormDataRepository.get_all",
                     return_value=[mock_task],
                 ):
                     with patch(
-                        "src.database.CompiledFormDataRepository.get_all",
+                        "database.CompiledFormDataRepository.get_all",
                         return_value=[mock_compiled],
                     ):
                         os.chdir(
@@ -136,16 +136,16 @@ class TestRegistroTarefasPageStreamlit:
     @patch.dict(os.environ, {"AUTH": "test_password"})
     def test_compiled_entries_display_empty(self):
         """Test display of compiled entries when no data exists"""
-        with patch("src.utils.check_password", return_value=True):
+        with patch("utils.check_password", return_value=True):
             with patch(
-                "src.database.YouthFormDataRepository.get_all", return_value=[]
+                "database.YouthFormDataRepository.get_all", return_value=[]
             ):
                 with patch(
-                    "src.database.TasksFormDataRepository.get_all",
+                    "database.TasksFormDataRepository.get_all",
                     return_value=[],
                 ):
                     with patch(
-                        "src.database.CompiledFormDataRepository.get_all",
+                        "database.CompiledFormDataRepository.get_all",
                         return_value=[],
                     ):
                         os.chdir(
@@ -611,17 +611,17 @@ class TestOrganizationColumnFeature:
         mock_compiled1.quantity = 1
         mock_compiled1.bonus = 5
 
-        with patch("src.utils.check_password", return_value=True):
+        with patch("utils.check_password", return_value=True):
             with patch(
-                "src.database.YouthFormDataRepository.get_all",
+                "database.YouthFormDataRepository.get_all",
                 return_value=[mock_youth1, mock_youth2],
             ):
                 with patch(
-                    "src.database.TasksFormDataRepository.get_all",
+                    "database.TasksFormDataRepository.get_all",
                     return_value=[mock_task1],
                 ):
                     with patch(
-                        "src.database.CompiledFormDataRepository.get_all",
+                        "database.CompiledFormDataRepository.get_all",
                         return_value=[mock_compiled1],
                     ):
                         os.chdir(
@@ -683,17 +683,17 @@ class TestOrganizationColumnFeature:
         mock_compiled2.quantity = 1
         mock_compiled2.bonus = 0
 
-        with patch("src.utils.check_password", return_value=True):
+        with patch("utils.check_password", return_value=True):
             with patch(
-                "src.database.YouthFormDataRepository.get_all",
+                "database.YouthFormDataRepository.get_all",
                 return_value=[mock_youth1, mock_youth2],
             ):
                 with patch(
-                    "src.database.TasksFormDataRepository.get_all",
+                    "database.TasksFormDataRepository.get_all",
                     return_value=[mock_task1],
                 ):
                     with patch(
-                        "src.database.CompiledFormDataRepository.get_all",
+                        "database.CompiledFormDataRepository.get_all",
                         return_value=[mock_compiled1, mock_compiled2],
                     ):
                         os.chdir(
