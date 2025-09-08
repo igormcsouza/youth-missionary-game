@@ -176,15 +176,16 @@ class TestDummyDataPopulation:
 
                 compiled_data = CompiledFormDataRepository.get_all()
                 current_time = time.time()
-                three_weeks_ago = current_time - (21 * 24 * 60 * 60)
+                # Add 1 minute tolerance to account for timing differences
+                three_weeks_ago = current_time - (21 * 24 * 60 * 60) - 60
 
                 for entry in compiled_data:
                     assert entry.timestamp >= three_weeks_ago, (
                         f"Entry timestamp {entry.timestamp} is older than 3 "
-                        f"weeks"
+                        f"weeks (with tolerance)"
                     )
                     assert (
-                        entry.timestamp <= current_time
+                        entry.timestamp <= current_time + 60
                     ), f"Entry timestamp {entry.timestamp} is in the future"
 
     def test_dummy_data_error_handling(self):

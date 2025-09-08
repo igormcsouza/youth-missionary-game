@@ -365,7 +365,8 @@ class TestDatabaseConnection:
             importlib.reload(database)
 
             assert database.POSTGRES_URL == ""
-            assert database.DB_URL == database.SQLITE_URL
+            # In test environment, DB_URL should be in-memory
+            assert database.DB_URL == "sqlite:///:memory:"
 
     def test_default_db_path_constant(self):
         """Test that default database path is correct"""

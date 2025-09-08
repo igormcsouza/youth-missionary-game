@@ -1,5 +1,6 @@
 import datetime as dt
 import os
+import sys
 import time
 import traceback
 from collections.abc import Sequence
@@ -241,6 +242,8 @@ class CompiledFormDataRepository:
 
 def populate_dummy_data():
     """Populate database with dummy data for testing purposes.
+    Creates entries for the current day and the previous 3 weeks
+    (21 days total).
     Only runs if POPULATEDUMMY environment variable is set to 'true'."""
 
     if os.getenv("POPULATEDUMMY", "").lower() != "true":
@@ -254,19 +257,27 @@ def populate_dummy_data():
     try:
         current_time = time.time()
 
-        # Calculate timestamps for the last 3 weeks
-        week1_timestamps = []
-        week2_timestamps = []
-        week3_timestamps = []
+        # Calculate timestamps for the current day and last 3 weeks
+        # (21 days total)
+        week1_timestamps = []  # Days 21-15 ago
+        week2_timestamps = []  # Days 14-8 ago
+        week3_timestamps = []  # Days 7-1 ago
+        current_week_timestamps = []  # Current day (day 0)
 
-        for days_ago in range(20, 14, -1):  # Week 1: 20-15 days ago
+        # Week 1: 21-15 days ago
+        for days_ago in range(21, 14, -1):
             week1_timestamps.append(current_time - (days_ago * 24 * 60 * 60))
 
-        for days_ago in range(14, 7, -1):  # Week 2: 14-8 days ago
+        # Week 2: 14-8 days ago
+        for days_ago in range(14, 7, -1):
             week2_timestamps.append(current_time - (days_ago * 24 * 60 * 60))
 
-        for days_ago in range(7, 0, -1):  # Week 3: 7-1 days ago
+        # Week 3: 7-1 days ago
+        for days_ago in range(7, 0, -1):
             week3_timestamps.append(current_time - (days_ago * 24 * 60 * 60))
+
+        # Current day: today (0 days ago)
+        current_week_timestamps.append(current_time)
 
         with Session(engine) as session:
             # First, populate youth data
@@ -427,6 +438,17 @@ def populate_dummy_data():
                 (17, 4, week3_timestamps[3], 1, 0),
                 (18, 5, week3_timestamps[4], 2, 2),
                 (19, 6, week3_timestamps[5], 1, 0),
+                # Current day entries (using current_week_timestamps)
+                (1, 1, current_week_timestamps[0], 1, 2),
+                (2, 2, current_week_timestamps[0], 2, 0),
+                (3, 3, current_week_timestamps[0], 1, 1),
+                (4, 4, current_week_timestamps[0], 1, 0),
+                (5, 5, current_week_timestamps[0], 3, 1),
+                (13, 7, current_week_timestamps[0], 2, 1),
+                (14, 8, current_week_timestamps[0], 1, 0),
+                (15, 9, current_week_timestamps[0], 1, 2),
+                (16, 10, current_week_timestamps[0], 2, 0),
+                (17, 11, current_week_timestamps[0], 1, 1),
             ]
 
             for (
@@ -459,8 +481,25 @@ def populate_dummy_data():
 SQLITE_URL = default_db_path
 POSTGRES_URL = os.getenv("POSTGRESCONNECTIONSTRING", "")
 
+
+# Check if we're running in a test environment
+def _is_test_environment():
+    """Check if we're currently running tests."""
+    return (
+        "pytest" in sys.modules
+        or "PYTEST_CURRENT_TEST" in os.environ
+        or "_pytest" in sys.modules
+        or any("test" in arg for arg in sys.argv)
+        or os.getenv("TESTING", "").lower() == "true"
+    )
+
+
 # Choose database based on environment variable
-DB_URL = POSTGRES_URL if POSTGRES_URL else SQLITE_URL
+# Use in-memory database during testing to avoid file creation
+if _is_test_environment():
+    DB_URL = "sqlite:///:memory:"
+else:
+    DB_URL = POSTGRES_URL if POSTGRES_URL else SQLITE_URL
 
 try:
     engine = create_engine(DB_URL)
