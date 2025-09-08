@@ -47,15 +47,15 @@ class TestDummyDataPopulation:
                 task_data = TasksFormDataRepository.get_all()
                 compiled_data = CompiledFormDataRepository.get_all()
 
-                assert len(youth_data) >= 20, (
-                    f"Expected >=20 youth, got {len(youth_data)}"
-                )
-                assert len(task_data) >= 20, (
-                    f"Expected >=20 tasks, got {len(task_data)}"
-                )
-                assert len(compiled_data) >= 50, (
-                    f"Expected >=50 compiled entries, got {len(compiled_data)}"
-                )
+                assert (
+                    len(youth_data) >= 20
+                ), f"Expected >=20 youth, got {len(youth_data)}"
+                assert (
+                    len(task_data) >= 20
+                ), f"Expected >=20 tasks, got {len(task_data)}"
+                assert (
+                    len(compiled_data) >= 50
+                ), f"Expected >=50 compiled entries, got {len(compiled_data)}"
 
     def test_populate_dummy_data_case_insensitive(self):
         """Test that POPULATEDUMMY accepts TRUE, True, true, etc."""
@@ -72,9 +72,9 @@ class TestDummyDataPopulation:
 
                     # Verify data was populated
                     youth_data = YouthFormDataRepository.get_all()
-                    assert len(youth_data) >= 20, (
-                        f"Failed for POPULATEDUMMY={value}"
-                    )
+                    assert (
+                        len(youth_data) >= 20
+                    ), f"Failed for POPULATEDUMMY={value}"
 
     def test_populate_dummy_data_false_values_ignored(self):
         """Test that false-like values for POPULATEDUMMY are ignored"""
@@ -91,9 +91,9 @@ class TestDummyDataPopulation:
 
                     # Verify no data was populated
                     youth_data = YouthFormDataRepository.get_all()
-                    assert len(youth_data) == 0, (
-                        f"Unexpectedly populated for POPULATEDUMMY={value}"
-                    )
+                    assert (
+                        len(youth_data) == 0
+                    ), f"Unexpectedly populated for POPULATEDUMMY={value}"
 
     def test_dummy_data_avoids_duplicates(self):
         """Test that dummy data population avoids duplicates"""
@@ -138,9 +138,9 @@ class TestDummyDataPopulation:
 
                 # Verify all expected tasks are present
                 for expected_task in expected_tasks:
-                    assert expected_task in task_names, (
-                        f"Missing expected task: {expected_task}"
-                    )
+                    assert (
+                        expected_task in task_names
+                    ), f"Missing expected task: {expected_task}"
 
     def test_dummy_data_youth_organizations(self):
         """Test that dummy data includes both Rapazes and Moças
@@ -159,12 +159,12 @@ class TestDummyDataPopulation:
                 rapazes_count = organizations.count("Rapazes")
                 mocas_count = organizations.count("Moças")
 
-                assert rapazes_count >= 5, (
-                    f"Expected >=5 Rapazes, got {rapazes_count}"
-                )
-                assert mocas_count >= 5, (
-                    f"Expected >=5 Moças, got {mocas_count}"
-                )
+                assert (
+                    rapazes_count >= 5
+                ), f"Expected >=5 Rapazes, got {rapazes_count}"
+                assert (
+                    mocas_count >= 5
+                ), f"Expected >=5 Moças, got {mocas_count}"
 
     def test_dummy_data_timestamps_are_recent(self):
         """Test that compiled data timestamps are from the last 3 weeks"""
@@ -183,9 +183,9 @@ class TestDummyDataPopulation:
                         f"Entry timestamp {entry.timestamp} is older than 3 "
                         f"weeks"
                     )
-                    assert entry.timestamp <= current_time, (
-                        f"Entry timestamp {entry.timestamp} is in the future"
-                    )
+                    assert (
+                        entry.timestamp <= current_time
+                    ), f"Entry timestamp {entry.timestamp} is in the future"
 
     def test_dummy_data_error_handling(self):
         """Test error handling when dummy data population fails"""
@@ -204,9 +204,9 @@ class TestDummyDataPopulation:
                         for call in mock_print.call_args_list
                         if "Error populating dummy data" in str(call)
                     ]
-                    assert len(error_calls) > 0, (
-                        "Expected error message was not printed"
-                    )
+                    assert (
+                        len(error_calls) > 0
+                    ), "Expected error message was not printed"
 
     def test_dummy_data_has_valid_foreign_keys(self):
         """Test that compiled data has valid foreign keys to youth and tasks"""
@@ -222,9 +222,9 @@ class TestDummyDataPopulation:
                 task_ids = {task.id for task in task_data}
 
                 for entry in compiled_data:
-                    assert entry.youth_id in youth_ids, (
-                        f"Invalid youth_id {entry.youth_id}"
-                    )
-                    assert entry.task_id in task_ids, (
-                        f"Invalid task_id {entry.task_id}"
-                    )
+                    assert (
+                        entry.youth_id in youth_ids
+                    ), f"Invalid youth_id {entry.youth_id}"
+                    assert (
+                        entry.task_id in task_ids
+                    ), f"Invalid task_id {entry.task_id}"

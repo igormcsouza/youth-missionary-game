@@ -1,5 +1,7 @@
 import datetime as dt
 import os
+import time
+import traceback
 from collections.abc import Sequence
 
 from sqlmodel import Field, Session, SQLModel, create_engine, select
@@ -250,8 +252,6 @@ def populate_dummy_data():
         return
 
     try:
-        import time
-
         current_time = time.time()
 
         # Calculate timestamps for the last 3 weeks
@@ -451,7 +451,6 @@ def populate_dummy_data():
 
     except Exception as e:
         print(f"Error populating dummy data: {str(e)}")
-        import traceback
 
         traceback.print_exc()
 
