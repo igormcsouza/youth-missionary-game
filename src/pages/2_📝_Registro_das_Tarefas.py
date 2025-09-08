@@ -4,12 +4,12 @@ from datetime import datetime
 import pandas as pd
 import streamlit as st
 
-from database import (
+from src.database import (
     CompiledFormDataRepository,
     TasksFormDataRepository,
     YouthFormDataRepository,
 )
-from utils import check_password
+from src.utils import check_password
 
 st.set_page_config(page_title="Registros das Tarefas", page_icon="📝")
 
