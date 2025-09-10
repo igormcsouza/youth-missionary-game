@@ -178,4 +178,3 @@ poetry run pytest tests/ --cov=src --cov-report=term-missing -v
 ## License
 
 This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
-# Test change
