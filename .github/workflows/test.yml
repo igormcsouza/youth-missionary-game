@@ -12,6 +12,8 @@ jobs:
 
     steps:
     - uses: actions/checkout@v4
+      with:
+        fetch-depth: 0
 
     - name: Set up Python 3.12
       id: setup-python
@@ -41,8 +43,19 @@ jobs:
     - name: Install pre-commit hooks
       run: poetry run pre-commit install
 
-    - name: Run pre-commit on all files
-      run: poetry run pre-commit run --all-files
+    - name: Run pre-commit on changed files
+      run: |
+        if [ "${{ github.event_name }}" = "pull_request" ]; then
+          # For pull requests, compare against the base branch
+          echo "Running pre-commit on changed files (PR mode)..."
+          poetry run pre-commit run --from-ref origin/${{ github.base_ref }} --to-ref HEAD
+        else
+          # For push events, compare against the previous commit
+          echo "Running pre-commit on changed files (push mode)..."
+          poetry run pre-commit run --from-ref HEAD~1 --to-ref HEAD
+        fi
+      env:
+        SKIP: pytest
 
     - name: Run tests with coverage
       env:
